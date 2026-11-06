@@ -10,6 +10,7 @@ import {
   createSignal,
   For,
   Match,
+  on,
   onCleanup,
   onMount,
   Show,
@@ -20,6 +21,7 @@ import { BookmarkIcon } from './BookmarkIcon'
 import { filterGroups, topMatch } from './filter'
 import { createSettings, type SettingsStore } from './settings'
 import { SettingsPanel } from './SettingsPanel'
+import { fitTiles, keepTilesFitted } from './tiles'
 
 const settingsPanelId = 'settings-panel'
 const filterHintId = 'filter-hint'
@@ -74,6 +76,20 @@ function GroupPanel(props: {
     props.total === undefined
       ? String(props.group.bookmarks.length)
       : `${props.group.bookmarks.length}/${props.total}`
+  const [list, setList] = createSignal<HTMLUListElement>()
+  // Settings change the lanes and the text. The filter adds the Enter hint.
+  createEffect(
+    on(
+      [list, () => props.group.bookmarks, () => props.store.settings(), () => props.filtering],
+      ([element]) => {
+        if (element) fitTiles(element)
+      },
+    ),
+  )
+  createEffect(() => {
+    const element = list()
+    if (element) onCleanup(keepTilesFitted(element))
+  })
   return (
     <section class="group" aria-label={props.group.name || 'Other bookmarks'}>
       <Show when={props.group.name}>
@@ -82,7 +98,7 @@ function GroupPanel(props: {
           <span class="group-count">{count()}</span>
         </header>
       </Show>
-      <ul class="cells">
+      <ul class="cells" ref={setList}>
         <For each={props.group.bookmarks}>
           {(bookmark) => (
             <BookmarkCell

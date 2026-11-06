@@ -1,6 +1,6 @@
 ---
 name: pin
-description: A precise joined grid of links in light and dark, sharp corners and mild borders.
+description: Square link tiles on precise lanes in light and dark, sharp corners and mild borders.
 colors:
   bg: "light-dark(#ffffff, #06070b)"
   panel: "light-dark(#ffffff, #0b0c12)"
@@ -65,7 +65,8 @@ rounded:
 spacing:
   gutter: "clamp(16px, 2vw, 24px)"
   inline: "8px"
-  group-gap: "12px"
+  group-gap: "20px"
+  tile-gutter: "8px"
   panel-inline: "14px"
   cell-padding: "9px 14px"
   cell-padding-compact: "7px 10px"
@@ -114,16 +115,13 @@ components:
   segment-selected:
     backgroundColor: "{colors.accent-wash}"
     textColor: "{colors.text}"
-  group-panel:
-    backgroundColor: "{colors.panel}"
-    rounded: "{rounded.none}"
   group-header:
     backgroundColor: "{colors.strip}"
     textColor: "{colors.text-2}"
     typography: "{typography.label}"
     padding: "7px 14px"
   cell:
-    backgroundColor: "transparent"
+    backgroundColor: "{colors.panel}"
     textColor: "{colors.text}"
     typography: "{typography.name}"
     rounded: "{rounded.none}"
@@ -161,7 +159,7 @@ components:
 
 **Creative North Star: "The Sharpened Grid"**
 
-The familiar dashboard grid, played straight and sharpened. Links sit in a precise joined grid instead of floating rounded tiles, so the screen reads as one ruled sheet that can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.
+The familiar dashboard grid, played straight and sharpened. Links sit in square tiles on precise lanes instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.
 
 The world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from two places only: the logos themselves, and a single amber signal that marks where input is and what Enter will do.
 
@@ -169,8 +167,8 @@ This system rejects sidebars, stat cards, hero headers, and soft shadows. It is 
 
 **Key Characteristics:**
 
-- Joined cells that share hairlines, with no gaps inside a group
-- Neutral header strips with a small tracked uppercase group name and a tabular count
+- Square tiles on lanes, 8px apart, widening to two lanes only when their content needs it
+- Neutral title bars with a small tracked uppercase group name and a tabular count
 - Zero radius on every surface and control
 - One amber accent, reserved for focus, top match, and selected settings
 - Light and dark themes defined as single paired tokens
@@ -188,10 +186,10 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 ### Neutral
 
 - **Ground** (#ffffff, #06070b): The page and sticky bar.
-- **Panel** (#ffffff, #0b0c12): Group panels, the filter field, the settings panel, and notices. Equal to the ground in light mode, one step lifted in dark.
-- **Strip** (#f2f3f6, #11131c): Group header strips only.
+- **Panel** (#ffffff, #0b0c12): Tiles, the filter field, the settings panel, and notices. Equal to the ground in light mode, one step lifted in dark.
+- **Strip** (#f2f3f6, #11131c): Group title bars only.
 - **Hover Tint** (#0b0d140a, #c0caf50e): The hover and pressed fill on any interactive surface.
-- **Hairline** (#0b0d141a, #c0caf51c): Panel outlines, cell rules, the bar's bottom edge, and dividers between settings.
+- **Hairline** (#0b0d141a, #c0caf51c): Tile and title bar outlines, the bar's bottom edge, and dividers between settings.
 - **Firm Hairline** (#0b0d1438, #c0caf533): Control outlines (filter, buttons, segments, monogram) and the settings panel, which must separate from what it overlays.
 - **Ink** (#0b0d14, #e4e8f7): Link names, titles, and typed text.
 - **Soft Ink** (#454c5e, #a2aaca): Descriptions, group names, resting icons, and notice copy.
@@ -217,7 +215,7 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 - **Name** (500, 14px, 1.4): Link names. Long names wrap instead of truncating.
 - **Description** (400, 12.5px, 1.4): The short phrase under a link name. One line with an ellipsis, or up to two lines on phones.
 - **Control** (400, 12px, 1.4): Segment labels, stepping to 600 when selected.
-- **Label** (600, 11px, 0.1em, uppercase): Group names in header strips.
+- **Label** (600, 11px, 0.1em, uppercase): Group names in title bars.
 - **Legend** (400, 10.5px, 0.1em, uppercase): The name of a settings group.
 - **Count** (400, 11px, tabular numerals): Group counts and the filter's match count.
 
@@ -231,31 +229,32 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 
 ## Layout
 
-A single full-width column of group panels in config order, with a gutter of 16px to 24px and 12px between panels. There is no sidebar and no maximum content width: the grid fills the window.
+A single full-width column of groups in config order, with a gutter of 16px to 24px and 20px between groups. There is no sidebar and no maximum content width: the grid fills the window.
 
 The sticky bar is a three-track grid: title at left, filter in the middle at up to 420px, settings control at far right. At 640px and below, the filter drops to its own full-width row under the title and settings control. The settings control comes before the filter in the DOM and is placed by the grid, so Tab from the filter reaches the results directly. The document's top scroll padding follows the bar's height, so a focused link never sits under it.
 
-Cells use an auto-filling grid with a minimum track that responds to the viewport (160px to 244px, or 150px to 190px at compact density). A chosen column count caps the tracks at that number, and they narrow to 150px before a column drops. Phones target two columns; at 353px and below the minimum track falls to 130px to hold them. Empty tracks in the last row stay as open panel space, with no filler.
+Tiles use an auto-filling grid of lanes with a minimum track that responds to the viewport (160px to 244px, or 150px to 190px at compact density), 8px apart. A chosen column count caps the lanes at that number, and they narrow to 150px before a lane drops. Rows are equal within a group, so tile tops line up across lanes. Phones target two lanes; below 360px the minimum track falls to 130px to hold them.
 
-Density is one switch, not many: compact tightens the cell padding, gap, minimum track, and icon together. Spacing otherwise steps through 8px inside controls, 12px between panels and cell contents, and 14px as the inline inset of panels.
+A tile whose content does not fit one lane takes two. The content is measured because it depends on rendered text, and grid placement does the rest, so tiles keep config order. A two-lane tile that does not fit at a row's end moves to the next row and leaves its lane open, as do empty lanes in the last row. There is no filler.
+
+Density is one switch, not many: compact tightens the cell padding, gap, minimum track, and icon together. Spacing otherwise steps through 8px inside controls and between tiles, 12px between cell contents, 20px between groups, and 14px as the inline inset of title bars.
 
 On a coarse pointer every control reaches at least 44px and the filter grows to 46px with 16px text. Cells hold a 44px minimum height at every density and on every pointer. A cell's hover fill applies only where the device can hover; touch gets the same fill while pressed.
 
 ### Named Rules
 
-**The Joined Cell Rule.** Inside a group, cells touch and share hairlines. Only group panels are separated by a gap.
+**The Lane Rule.** Inside a group, tiles sit on equal lanes and equal rows, 8px apart. A tile takes a second lane only when its content does not fit one.
 
-**The Everything Is Visible Rule.** All links are on the page at rest. The grid never paginates, collapses, or scrolls within a panel.
+**The Everything Is Visible Rule.** All links are on the page at rest. The grid never paginates, collapses, or scrolls within a group.
 
 ## Elevation & Depth
 
 Flat. Depth comes from tonal steps (ground, panel, strip) and hairlines. The sticky bar and the settings panel float over content with no shadow at all, separated only by their opaque fill and a border.
 
-`box-shadow` appears only as a way to draw zero-blur lines where a border would break the grid or shift layout.
+`box-shadow` appears only as a way to draw zero-blur lines where a border would shift layout.
 
 ### Shadow Vocabulary
 
-- **Shared rule** (`box-shadow: 1px 0 0 var(--border), 0 1px 0 var(--border)`): The right and bottom rule of each cell. The panel clips the outer ones, leaving its border as the only outline.
 - **Selected ring** (`box-shadow: inset 0 0 0 1px var(--accent)`): A selected segment.
 - **Top match ring** (`box-shadow: inset 0 0 0 1px var(--accent-line)`): The cell Enter will open.
 - **Logo halo** (`filter: drop-shadow(0 0 1px var(--icon-halo)) drop-shadow(0 0 1px var(--icon-halo-2))`): Image logos only. A legibility aid for third-party artwork, and the only blur in the system.
@@ -278,11 +277,11 @@ Motion across all of these is limited to a 100ms ease-out change of color or bac
 
 ### Buttons
 
-Plain and outlined; no filled variant exists.
+Plain, with no filled variant.
 
-- **Shape:** Square with a firm hairline outline (0px, 1px).
-- **Text button:** Transparent, ink label, 34px tall with 12px inline padding. Used only for notice recovery actions such as retry and clear filter.
-- **Icon button:** Transparent 34px square holding a 17px icon in soft ink.
+- **Shape:** Square (0px).
+- **Text button:** Transparent with a firm hairline outline, ink label, 34px tall with 12px inline padding. Used only for notice recovery actions such as retry and clear filter.
+- **Icon button:** Transparent 34px square with no outline, holding a 17px icon in soft ink. Its glyph lines up with the content edge, matching the home icon opposite.
 - **Hover / Focus:** Hover adds the hover tint, and an icon button's icon steps up to ink.
 
 ### Chips
@@ -295,10 +294,11 @@ Settings choices are segmented radio rows rather than free chips.
 ### Cards / Containers
 
 - **Corner Style:** Square (0px).
-- **Background:** Panel, with a strip-toned header when the group has a name. Ungrouped links render as a panel with no header.
+- **Groups:** No container. A group is a title bar with its tiles on the page ground below it, and ungrouped links are tiles with no title bar.
+- **Background:** Panel on tiles and notices, strip on title bars.
 - **Shadow Strategy:** None; see Elevation & Depth.
 - **Border:** 1px hairline.
-- **Internal Padding:** Header 7px by 14px. Notices use 20px with an 8px stack.
+- **Internal Padding:** Title bar 7px by 14px. Notices use 20px with an 8px stack.
 
 ### Inputs / Fields
 
@@ -315,16 +315,16 @@ Settings choices are segmented radio rows rather than free chips.
 
 ### Bookmark Cell
 
-The signature element. A whole-cell link at a 44px minimum height: a 26px icon (20px at compact), then a name with an optional description.
+The signature element. A whole-tile link at a 44px minimum height, with a hairline outline on panel fill: a 26px icon (20px at compact), then a name with an optional description.
 
 - **Hover / Pressed:** Hover tint.
-- **Focus:** The amber ring sits inside the cell (offset -2px), so joined neighbors never clip it.
+- **Focus:** The amber ring sits inside the tile (offset -2px).
 - **Top match:** While filtering, the cell Enter will open takes the amber wash, the softer amber ring, and a small outlined Enter hint at its far end. Coarse pointers hide the hint. Once a result has keyboard focus, Enter opens that result, so the wash and hint move to it and the top match returns to rest.
 - **Icon:** Multicolor logos and single-color masks share a contained box. When a source is missing or fails, a monogram stands in: the name's first letter or digit in weight 600 at half the icon size, in soft ink, in a bordered square.
 
 ### Group Header
 
-A strip-toned bar with the group name at left and a count at far right. While filtering, the count reads as shown over total.
+A full-width strip-toned title bar with a hairline outline, the group name at left and a count at far right. It sits 8px above its tiles and contains nothing else. While filtering, the count reads as shown over total.
 
 ### Notice
 
@@ -340,7 +340,7 @@ The favicon's amber pin on the dark ground, in both themes. `apps/web/public/ico
 
 - **Do** define every new color as one `light-dark()` pair, and meet WCAG AA in both themes.
 - **Do** use zero radius and a 1px hairline on every new surface and control.
-- **Do** keep cells joined inside a group, with shared rules and no gaps.
+- **Do** keep tiles on lanes inside a group, widening a tile only when its content does not fit.
 - **Do** reserve amber for focus, the top match, and selected settings.
 - **Do** use Lucide icons at stroke 1.75 with square caps and miter joins.
 - **Do** give a monogram fallback to anything that loads an external icon.
