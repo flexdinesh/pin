@@ -13,6 +13,14 @@ window.matchMedia = (media) => ({
   dispatchEvent: () => false,
 })
 
+// jsdom has no layout, so nothing resizes and no font loads. Tile fitting tests drive these.
+window.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+Object.defineProperty(document, 'fonts', { configurable: true, value: new EventTarget() })
+
 afterEach(() => {
   cleanup()
   localStorage.clear()
