@@ -1,0 +1,10 @@
+node_modules/
+dist/
+!apps/server/internal/webui/dist/
+apps/server/internal/webui/dist/*
+!apps/server/internal/webui/dist/.gitkeep
+/bin/
+coverage/
+.env
+.DS_Store
+.scratch/
