@@ -1,7 +1,7 @@
 import Monitor from 'lucide-solid/icons/monitor'
 import Moon from 'lucide-solid/icons/moon'
 import Sun from 'lucide-solid/icons/sun'
-import { For, type JSX } from 'solid-js'
+import { For, Show, type JSX } from 'solid-js'
 import {
   columnChoices,
   densities,
@@ -85,13 +85,15 @@ export function SettingsPanel(props: { store: SettingsStore; id: string }) {
         value={current().density}
         onChange={(density) => props.store.update({ density })}
       />
-      <Choice
-        legend="Open links in"
-        options={linkTargets}
-        label={targetLabel}
-        value={current().linkTarget}
-        onChange={(linkTarget) => props.store.update({ linkTarget })}
-      />
+      <Show when={!props.store.installed}>
+        <Choice
+          legend="Open links in"
+          options={linkTargets}
+          label={targetLabel}
+          value={current().linkTarget}
+          onChange={(linkTarget) => props.store.update({ linkTarget })}
+        />
+      </Show>
       <Choice
         legend="Descriptions"
         options={descriptionChoices}

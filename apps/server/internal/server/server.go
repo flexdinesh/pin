@@ -15,7 +15,46 @@ const (
 	cacheImmutable = "public, max-age=31536000, immutable"
 )
 
-// New returns the handler. assets must hold index.html and assets/*.
+const appColor = "#06070b"
+
+type manifestIcon struct {
+	Src     string `json:"src"`
+	Sizes   string `json:"sizes"`
+	Type    string `json:"type"`
+	Purpose string `json:"purpose,omitempty"`
+}
+
+type manifest struct {
+	ID              string         `json:"id"`
+	Name            string         `json:"name"`
+	ShortName       string         `json:"short_name"`
+	StartURL        string         `json:"start_url"`
+	Scope           string         `json:"scope"`
+	Display         string         `json:"display"`
+	BackgroundColor string         `json:"background_color"`
+	ThemeColor      string         `json:"theme_color"`
+	Icons           []manifestIcon `json:"icons"`
+}
+
+func newManifest(title string) manifest {
+	return manifest{
+		ID:              "/",
+		Name:            title,
+		ShortName:       "pin",
+		StartURL:        "/",
+		Scope:           "/",
+		Display:         "standalone",
+		BackgroundColor: appColor,
+		ThemeColor:      appColor,
+		Icons: []manifestIcon{
+			{Src: "/icons/icon-192.png", Sizes: "192x192", Type: "image/png"},
+			{Src: "/icons/icon-512.png", Sizes: "512x512", Type: "image/png"},
+			{Src: "/icons/icon-maskable-512.png", Sizes: "512x512", Type: "image/png", Purpose: "maskable"},
+		},
+	}
+}
+
+// New returns the handler. assets must hold index.html, assets/* and icons/*.
 func New(cfg config.Config, assets fs.FS) (http.Handler, error) {
 	index, err := fs.ReadFile(assets, "index.html")
 	if err != nil {
@@ -25,13 +64,23 @@ func New(cfg config.Config, assets fs.FS) (http.Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("encode config: %w", err)
 	}
+	encodedManifest, err := json.Marshal(newManifest(cfg.Title))
+	if err != nil {
+		return nil, fmt.Errorf("encode manifest: %w", err)
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", respond("text/html; charset=utf-8", index))
 	mux.HandleFunc("GET /api/config", respond("application/json", encoded))
+	mux.HandleFunc("GET /manifest.webmanifest", respond("application/manifest+json", encodedManifest))
 	mux.HandleFunc("GET /healthz", respond("text/plain; charset=utf-8", []byte("ok\n")))
 
 	files := http.FileServerFS(assets)
+	mux.HandleFunc("GET /icons/", func(w http.ResponseWriter, r *http.Request) {
+		// Unhashed names, so a replaced icon must not stay cached.
+		w.Header().Set("Cache-Control", cacheNever)
+		files.ServeHTTP(w, r)
+	})
 	mux.HandleFunc("GET /assets/", func(w http.ResponseWriter, r *http.Request) {
 		// Vite hashes these names, so a response never goes stale. Set before
 		// serving; only success responses are cacheable by default.

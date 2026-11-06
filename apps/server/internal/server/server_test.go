@@ -2,6 +2,8 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
+	"image/png"
 	"io/fs"
 	"net/http"
 	"net/http/httptest"
@@ -15,9 +17,10 @@ import (
 
 func fixtureAssets() fstest.MapFS {
 	return fstest.MapFS{
-		"index.html":       {Data: []byte("<!doctype html><title>pin</title>")},
-		"assets/app-1.js":  {Data: []byte("console.log(1)")},
-		"assets/app-1.css": {Data: []byte("body{}")},
+		"index.html":         {Data: []byte("<!doctype html><title>pin</title>")},
+		"assets/app-1.js":    {Data: []byte("console.log(1)")},
+		"assets/app-1.css":   {Data: []byte("body{}")},
+		"icons/icon-192.png": {Data: []byte("\x89PNG\r\n\x1a\n")},
 	}
 }
 
@@ -53,6 +56,9 @@ func TestRoutes(t *testing.T) {
 		{"/healthz", 200, "text/plain; charset=utf-8", "no-cache"},
 		{"/assets/app-1.js", 200, "text/javascript; charset=utf-8", "public, max-age=31536000, immutable"},
 		{"/assets/app-1.css", 200, "text/css; charset=utf-8", "public, max-age=31536000, immutable"},
+		{"/manifest.webmanifest", 200, "application/manifest+json", "no-cache"},
+		{"/icons/icon-192.png", 200, "image/png", "no-cache"},
+		{"/icons/missing.png", 404, "", ""},
 		{"/assets/missing.js", 404, "", ""},
 		{"/index.html", 404, "", ""},
 		{"/missing", 404, "", ""},
@@ -105,6 +111,34 @@ func TestConfigResponseIsGroupedWithResolvedIcons(t *testing.T) {
 	}
 }
 
+func decodeManifest(t *testing.T, handler http.Handler) manifest {
+	t.Helper()
+	var body manifest
+	if err := json.Unmarshal(get(handler, http.MethodGet, "/manifest.webmanifest").Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	return body
+}
+
+func TestManifestMeetsInstallCriteria(t *testing.T) {
+	body := decodeManifest(t, newHandler(t, fixtureAssets()))
+	if body.Name != "Lab" || body.ShortName != "pin" {
+		t.Errorf("names = %q, %q", body.Name, body.ShortName)
+	}
+	if body.StartURL != "/" || body.Scope != "/" || body.Display != "standalone" {
+		t.Errorf("manifest = %+v", body)
+	}
+	sizes := map[string]bool{}
+	for _, entry := range body.Icons {
+		if entry.Purpose == "" {
+			sizes[entry.Sizes] = true
+		}
+	}
+	if !sizes["192x192"] || !sizes["512x512"] {
+		t.Errorf("icons = %+v", body.Icons)
+	}
+}
+
 func TestRejectsWrites(t *testing.T) {
 	if got := get(newHandler(t, fixtureAssets()), http.MethodPost, "/api/config").Code; got != http.StatusMethodNotAllowed {
 		t.Errorf("status = %d", got)
@@ -154,5 +188,29 @@ func TestEmbeddedWebApp(t *testing.T) {
 		if response.Code != 200 || response.Header().Get("Cache-Control") != cacheImmutable {
 			t.Errorf("%s: status %d, cache %q", path, response.Code, response.Header().Get("Cache-Control"))
 		}
+	}
+
+	for _, entry := range decodeManifest(t, handler).Icons {
+		assertPNG(t, handler, entry.Src, entry.Sizes)
+	}
+	assertPNG(t, handler, "/icons/apple-touch-icon.png", "180x180")
+	if !strings.Contains(page.Body.String(), `href="/icons/apple-touch-icon.png"`) ||
+		!strings.Contains(page.Body.String(), `href="/manifest.webmanifest"`) {
+		t.Error("index: missing install links")
+	}
+}
+
+func assertPNG(t *testing.T, handler http.Handler, path, sizes string) {
+	t.Helper()
+	response := get(handler, http.MethodGet, path)
+	if response.Code != 200 {
+		t.Fatalf("%s: status %d", path, response.Code)
+	}
+	image, err := png.DecodeConfig(response.Body)
+	if err != nil {
+		t.Fatalf("%s: %v", path, err)
+	}
+	if got := fmt.Sprintf("%dx%d", image.Width, image.Height); got != sizes {
+		t.Errorf("%s: size %s, want %s", path, got, sizes)
 	}
 }

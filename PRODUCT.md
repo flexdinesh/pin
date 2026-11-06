@@ -35,7 +35,8 @@ Links and groups only: one file, no widgets, no status, no accounts. The server 
 - Groups are flat and ordered by first appearance. Ungrouped links come last, with no heading.
 - Icon sources: dashboard-icons, `mdi-` and `si-` (monochrome, optional hex color), `sh-`, and http(s) URLs. Multicolor logos appear beside monochrome glyphs.
 - Settings, per browser: theme (system, light, dark), columns, density, link target, show descriptions.
-- Type anywhere to filter; Enter opens the top match. Touch devices get a visible search control.
+- Type anywhere to filter; Enter opens the top match and Tab moves to the results. Touch devices get a visible search control.
+- Installable from the browser's own UI, with no in-app install control and no offline mode. The installed app always opens links outside its window and hides the link target setting.
 - No auth, no accounts, no in-app editing. No accent, collapse or reorder settings.
 
 ## Brand Commitments

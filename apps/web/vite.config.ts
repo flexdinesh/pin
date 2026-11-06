@@ -8,7 +8,10 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    proxy: { '/api': 'http://localhost:8080' },
+    proxy: {
+      '/api': 'http://localhost:8080',
+      '/manifest.webmanifest': 'http://localhost:8080',
+    },
   },
   test: {
     environment: 'jsdom',

@@ -49,8 +49,18 @@ Local paths like `/icons/foo.png` are not supported.
 
 ## Use
 
-- Start typing anywhere to filter by name, description or group. Enter opens the top match, and Esc clears.
+- Start typing anywhere to filter by name, description or group. Enter opens the top match, Tab moves to the results, and Esc clears.
 - The cog sets theme, columns, density, link target and descriptions. Settings stay in that browser.
+
+## Install
+
+pin installs as an app from your browser's own UI. Installing needs HTTPS or localhost.
+
+- Chrome or Edge on desktop: use the install icon in the address bar.
+- Android: Chrome menu, then Add to Home screen.
+- iPhone or iPad: Share, then Add to Home Screen.
+
+The installed app always opens links outside its window, so the link target setting is hidden there. On phones the OS may show them in an in-app browser view. pin needs its server to load: there is no offline mode.
 
 ## Develop
 

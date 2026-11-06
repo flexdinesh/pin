@@ -22,20 +22,26 @@ import { createSettings, type SettingsStore } from './settings'
 import { SettingsPanel } from './SettingsPanel'
 
 const settingsPanelId = 'settings-panel'
+const filterHintId = 'filter-hint'
 
 const countBookmarks = (groups: Group[]) =>
   groups.reduce((total, group) => total + group.bookmarks.length, 0)
 
-function BookmarkCell(props: { bookmark: Bookmark; top: boolean; store: SettingsStore }) {
+function BookmarkCell(props: {
+  bookmark: Bookmark
+  top: boolean
+  filtering: boolean
+  store: SettingsStore
+}) {
   const settings = () => props.store.settings()
   return (
     <li>
       <a
         class="cell"
-        classList={{ top: props.top }}
+        classList={{ top: props.top, filtered: props.filtering }}
         href={props.bookmark.url}
-        target={settings().linkTarget === 'new' ? '_blank' : undefined}
-        rel={settings().linkTarget === 'new' ? 'noopener' : undefined}
+        target={props.store.linkTarget() === 'new' ? '_blank' : undefined}
+        rel={props.store.linkTarget() === 'new' ? 'noopener' : undefined}
         title={props.bookmark.description}
         data-top-match={props.top ? '' : undefined}
       >
@@ -46,9 +52,10 @@ function BookmarkCell(props: { bookmark: Bookmark; top: boolean; store: Settings
             <span class="cell-description">{props.bookmark.description}</span>
           </Show>
         </span>
-        <Show when={props.top}>
-          <kbd class="enter-hint" aria-label="Press Enter to open">
-            <CornerDownLeft size={13} stroke-width={1.75} aria-hidden="true" />
+        {/* CSS shows it on the cell Enter would open: the top match or the focused cell. */}
+        <Show when={props.filtering}>
+          <kbd class="enter-hint" aria-hidden="true">
+            <CornerDownLeft size={13} stroke-width={1.75} />
           </kbd>
         </Show>
       </a>
@@ -60,6 +67,7 @@ function GroupPanel(props: {
   group: Group
   total: number | undefined
   top: Bookmark | undefined
+  filtering: boolean
   store: SettingsStore
 }) {
   const count = () =>
@@ -77,7 +85,12 @@ function GroupPanel(props: {
       <ul class="cells">
         <For each={props.group.bookmarks}>
           {(bookmark) => (
-            <BookmarkCell bookmark={bookmark} top={bookmark === props.top} store={props.store} />
+            <BookmarkCell
+              bookmark={bookmark}
+              top={bookmark === props.top}
+              filtering={props.filtering}
+              store={props.store}
+            />
           )}
         </For>
       </ul>
@@ -118,7 +131,13 @@ function Dashboard(props: {
       <Match when={visible().length > 0}>
         <For each={visible()}>
           {(group) => (
-            <GroupPanel group={group} total={totalOf(group.name)} top={top()} store={props.store} />
+            <GroupPanel
+              group={group}
+              total={totalOf(group.name)}
+              top={top()}
+              filtering={filtering()}
+              store={props.store}
+            />
           )}
         </For>
       </Match>
@@ -126,9 +145,10 @@ function Dashboard(props: {
   )
 }
 
-function startsFilter(event: KeyboardEvent): boolean {
+function startsFilter(event: KeyboardEvent, hasQuery: boolean): boolean {
   if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return false
-  if (event.key.length !== 1 || event.key === ' ') return false
+  const types = event.key.length === 1 && event.key !== ' '
+  if (!types && !(event.key === 'Backspace' && hasQuery)) return false
   const target = event.target
   if (!(target instanceof Element)) return true
   return target.closest('input, textarea, select, [popover]') === null
@@ -141,6 +161,11 @@ export function App() {
   const [input, setInput] = createSignal<HTMLInputElement>()
 
   const clear = () => setQuery('')
+  // Clearing can remove the focused element, so focus has to go somewhere deliberate.
+  const clearAndFocus = () => {
+    clear()
+    input()?.focus()
+  }
   const loaded = () => (config.state === 'ready' ? config() : undefined)
   const matchCount = createMemo(() => {
     const current = loaded()
@@ -150,6 +175,10 @@ export function App() {
     const current = loaded()
     return current ? countBookmarks(current.groups) : 0
   }
+  const status = () => {
+    if (!loaded() || query().trim() === '') return ''
+    return matchCount() === 0 ? 'No matches' : `${matchCount()} of ${total()} bookmarks`
+  }
 
   createEffect(() => {
     const title = loaded()?.title
@@ -157,10 +186,16 @@ export function App() {
   })
 
   const onDocumentKeyDown = (event: KeyboardEvent) => {
-    if (startsFilter(event)) {
-      input()?.focus()
+    if (startsFilter(event, query() !== '')) {
+      // Focus restores a selection left by tabbing through the field, and a keystroke
+      // from elsewhere must extend the query rather than replace it.
+      const field = input()
+      field?.focus()
+      field?.setSelectionRange(field.value.length, field.value.length)
     } else if (event.key === 'Escape' && query() !== '') {
-      clear()
+      const fromResults = event.target instanceof Element && event.target.closest('main') !== null
+      if (fromResults) clearAndFocus()
+      else clear()
     }
   }
 
@@ -171,7 +206,8 @@ export function App() {
 
   const onInputKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
-      input()?.blur()
+      // The first Escape clears, through the document handler, and keeps focus here.
+      if (query() === '') input()?.blur()
     } else if (event.key === 'Enter') {
       event.preventDefault()
       const link = document.querySelector('[data-top-match]')
@@ -181,6 +217,18 @@ export function App() {
         clear()
       }
     }
+  }
+
+  // Enter on a focused result behaves like Enter on the filter. Mouse, touch and
+  // modified activations keep the filter, so several results can be opened.
+  const onResultsClick = (event: MouseEvent) => {
+    if (event.detail !== 0 || query().trim() === '') return
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+    if (!(event.target instanceof Element)) return
+    const link = event.target.closest('a')
+    if (link === null || link !== document.activeElement) return
+    // Clearing removes the link, so wait until the browser has followed it.
+    setTimeout(clearAndFocus)
   }
 
   return (
@@ -193,12 +241,23 @@ export function App() {
           </span>
           <span class="title-text">{loaded()?.title}</span>
         </h1>
+        {/* Before the filter in Tab order, so Tab from the filter reaches results directly.
+            Grid placement keeps it visually at the far end. */}
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Settings"
+          popovertarget={settingsPanelId}
+        >
+          <SettingsIcon size={17} stroke-width={1.75} aria-hidden="true" />
+        </button>
         <div class="filter" role="search">
           <Search size={16} stroke-width={1.75} aria-hidden="true" />
           <input
             ref={setInput}
             type="text"
             aria-label="Filter bookmarks"
+            aria-describedby={filterHintId}
             placeholder="Type to filter"
             autocomplete="off"
             enterkeyhint="go"
@@ -208,34 +267,32 @@ export function App() {
             onInput={(event) => setQuery(event.currentTarget.value)}
             onKeyDown={onInputKeyDown}
           />
+          <span id={filterHintId} class="visually-hidden">
+            Enter opens the top match. Tab moves to results. Escape clears.
+          </span>
+          {/* Stays mounted: a live region added with its text may not be announced. */}
+          <span class="visually-hidden" role="status">
+            {status()}
+          </span>
           <Show when={query() !== ''}>
-            <span class="filter-count" role="status">
+            <span class="filter-count" aria-hidden="true">
               {matchCount()}/{total()}
             </span>
+            {/* Out of the Tab order so results are one Tab away. Escape does the same. */}
             <button
               type="button"
               class="filter-clear"
+              tabindex={-1}
               aria-label="Clear filter"
-              onClick={() => {
-                clear()
-                input()?.focus()
-              }}
+              onClick={clearAndFocus}
             >
               <X size={16} stroke-width={1.75} aria-hidden="true" />
             </button>
           </Show>
         </div>
-        <button
-          type="button"
-          class="icon-button"
-          aria-label="Settings"
-          popovertarget={settingsPanelId}
-        >
-          <SettingsIcon size={17} stroke-width={1.75} aria-hidden="true" />
-        </button>
       </header>
       <SettingsPanel store={store} id={settingsPanelId} />
-      <main class="groups">
+      <main class="groups" onClick={onResultsClick}>
         <Switch>
           <Match when={config.error !== undefined}>
             <div class="notice" role="alert">
@@ -248,7 +305,7 @@ export function App() {
           </Match>
           <Match when={loaded()}>
             {(current) => (
-              <Dashboard config={current()} query={query()} onClear={clear} store={store} />
+              <Dashboard config={current()} query={query()} onClear={clearAndFocus} store={store} />
             )}
           </Match>
         </Switch>

@@ -233,7 +233,7 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 
 A single full-width column of group panels in config order, with a gutter of 16px to 24px and 12px between panels. There is no sidebar and no maximum content width: the grid fills the window.
 
-The sticky bar is a three-track grid: title at left, filter in the middle at up to 420px, settings control at far right. At 640px and below, the filter drops to its own full-width row under the title and settings control.
+The sticky bar is a three-track grid: title at left, filter in the middle at up to 420px, settings control at far right. At 640px and below, the filter drops to its own full-width row under the title and settings control. The settings control comes before the filter in the DOM and is placed by the grid, so Tab from the filter reaches the results directly. The document's top scroll padding follows the bar's height, so a focused link never sits under it.
 
 Cells use an auto-filling grid with a minimum track that responds to the viewport (160px to 244px, or 150px to 190px at compact density). A chosen column count caps the tracks at that number, and they narrow to 150px before a column drops. Phones target two columns; at 353px and below the minimum track falls to 130px to hold them. Empty tracks in the last row stay as open panel space, with no filler.
 
@@ -305,6 +305,8 @@ Settings choices are segmented radio rows rather than free chips.
 - **Style:** Panel fill with a firm hairline, 34px tall, holding a 16px search icon, the input, and once there is a query, a count and a clear control.
 - **Focus:** The whole field's border turns amber and the caret is amber. This replaces the ring on the input.
 - **Placeholder:** Faint ink at full opacity.
+- **Clear control:** Out of the Tab order, because Escape does the same. Clicking it clears and returns focus to the field.
+- **Announcements:** A visually hidden status stays mounted and reads the result count or "No matches". The visible count is hidden from assistive technology.
 
 ### Navigation
 
@@ -317,7 +319,7 @@ The signature element. A whole-cell link at a 44px minimum height: a 26px icon (
 
 - **Hover / Pressed:** Hover tint.
 - **Focus:** The amber ring sits inside the cell (offset -2px), so joined neighbors never clip it.
-- **Top match:** While filtering, the cell Enter will open takes the amber wash, the softer amber ring, and a small outlined Enter hint at its far end. Coarse pointers hide the hint.
+- **Top match:** While filtering, the cell Enter will open takes the amber wash, the softer amber ring, and a small outlined Enter hint at its far end. Coarse pointers hide the hint. Once a result has keyboard focus, Enter opens that result, so the wash and hint move to it and the top match returns to rest.
 - **Icon:** Multicolor logos and single-color masks share a contained box. When a source is missing or fails, a monogram stands in: the name's first letter or digit in weight 600 at half the icon size, in soft ink, in a bordered square.
 
 ### Group Header
@@ -327,6 +329,10 @@ A strip-toned bar with the group name at left and a count at far right. While fi
 ### Notice
 
 An inline panel in the content column for the empty, no-match, and load-failure states: a title line, short plain copy, and a text button when there is a recovery action.
+
+### App Icon
+
+The favicon's amber pin on the dark ground, in both themes. `apps/web/public/icons/` holds PNGs rendered from it with `rsvg-convert`: 192, 512 and 180 (Apple touch) from `src/favicon.svg`, and a 512 maskable from `src/icon-maskable.svg`, which scales the glyph to 80% to stay inside the safe zone. Change the SVG and re-render; never edit the PNGs.
 
 ## Do's and Don'ts
 

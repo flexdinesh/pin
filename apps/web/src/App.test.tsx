@@ -34,6 +34,9 @@ async function renderLoaded() {
 
 const linkNames = () => screen.queryAllByRole('link').map((link) => link.textContent)
 const grafanaLink = () => screen.getByRole<HTMLAnchorElement>('link', { name: /Grafana/ })
+const filterInput = () => screen.getByRole<HTMLInputElement>('textbox')
+const focused = () => document.activeElement
+const stopNavigation = (event: MouseEvent) => event.preventDefault()
 
 beforeEach(() => {
   document.title = ''
@@ -98,7 +101,7 @@ describe('type to filter', () => {
     await userEvent.keyboard('long')
     expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Filter bookmarks' }))
     expect(linkNames().length).toBe(1)
-    expect(screen.getByRole('status').textContent).toBe('1/3')
+    expect(screen.getByRole('status').textContent).toBe('1 of 3 bookmarks')
     expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
       'Infrastructure',
     ])
@@ -157,7 +160,165 @@ describe('type to filter', () => {
   })
 })
 
+describe('keyboard path through results', () => {
+  it('reaches the first result with one Tab and returns with Shift+Tab', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('r')
+    await userEvent.tab()
+    expect(focused()).toBe(grafanaLink())
+    await userEvent.tab({ shift: true })
+    expect(focused()).toBe(filterInput())
+  })
+
+  it('walks results in order', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('r')
+    await userEvent.tab()
+    await userEvent.tab()
+    expect(focused()?.textContent).toContain('Longhorn')
+    await userEvent.tab()
+    expect(focused()?.textContent).toContain('Registry')
+  })
+
+  it('keeps Settings in the Tab order, before the filter', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('r')
+    await userEvent.tab({ shift: true })
+    expect(focused()).toBe(screen.getByRole('button', { name: 'Settings' }))
+  })
+
+  it('keeps the clear control clickable but out of the Tab order', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('r')
+    const clearControl = screen.getByRole('button', { name: 'Clear filter' })
+    expect(clearControl.tabIndex).toBe(-1)
+    await userEvent.click(clearControl)
+    expect(filterInput().value).toBe('')
+    expect(focused()).toBe(filterInput())
+  })
+
+  it('tabs to the recovery action when nothing matches', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('zzz')
+    await userEvent.tab()
+    const recovery = screen.getByText('Clear filter')
+    expect(focused()).toBe(recovery)
+    await userEvent.click(recovery)
+    expect(focused()).toBe(filterInput())
+  })
+
+  it('opens the focused result on Enter, then clears and returns to the filter', async () => {
+    await renderLoaded()
+    const opened: string[] = []
+    const onClick = (event: MouseEvent) => {
+      if (event.target instanceof Element) opened.push(event.target.closest('a')?.href ?? '')
+      event.preventDefault()
+    }
+    document.addEventListener('click', onClick)
+    await userEvent.keyboard('r')
+    await userEvent.tab()
+    await userEvent.tab()
+    await userEvent.keyboard('{Enter}')
+    document.removeEventListener('click', onClick)
+    expect(opened).toEqual(['https://longhorn.test/'])
+    await waitFor(() => expect(filterInput().value).toBe(''))
+    expect(focused()).toBe(filterInput())
+  })
+
+  it('keeps the filter after a mouse or modified activation of a result', async () => {
+    await renderLoaded()
+    document.addEventListener('click', stopNavigation)
+    await userEvent.keyboard('gra')
+    await userEvent.click(grafanaLink())
+    grafanaLink().focus()
+    fireEvent.click(grafanaLink(), { detail: 0, ctrlKey: true })
+    await new Promise((resolve) => setTimeout(resolve))
+    document.removeEventListener('click', stopNavigation)
+    expect(filterInput().value).toBe('gra')
+  })
+
+  it('returns to the filter on Escape from a result', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('r')
+    await userEvent.tab()
+    await userEvent.keyboard('{Escape}')
+    expect(filterInput().value).toBe('')
+    expect(focused()).toBe(filterInput())
+  })
+
+  it('keeps focus in the filter on the first Escape and leaves on the second', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('r{Escape}')
+    expect(focused()).toBe(filterInput())
+    await userEvent.keyboard('{Escape}')
+    expect(focused()).toBe(document.body)
+  })
+
+  it('returns to the filter from a result on typing and Backspace', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('re')
+    await userEvent.tab()
+    await userEvent.keyboard('g')
+    expect(filterInput().value).toBe('reg')
+    await userEvent.tab()
+    // user-event applies the deletion to the old target, so only focus is checked here.
+    // A browser then deletes from the filter, which focus moved to on keydown.
+    await userEvent.keyboard('{Backspace}')
+    expect(focused()).toBe(filterInput())
+  })
+
+  it('appends to the query after tabbing back through the filter', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('re')
+    await userEvent.tab()
+    // Tabbing into a text field selects its contents.
+    await userEvent.tab({ shift: true })
+    await userEvent.tab()
+    await userEvent.keyboard('g')
+    expect(filterInput().value).toBe('reg')
+  })
+
+  it('does not capture Backspace with no query', async () => {
+    await renderLoaded()
+    fireEvent.keyDown(document.body, { key: 'Backspace' })
+    expect(focused()).toBe(document.body)
+  })
+
+  it('announces results through a status that exists before filtering', async () => {
+    await renderLoaded()
+    const status = screen.getByRole('status')
+    expect(status.textContent).toBe('')
+    await userEvent.keyboard('zzz')
+    expect(screen.getByRole('status')).toBe(status)
+    expect(status.textContent).toBe('No matches')
+    await userEvent.keyboard('{Escape}')
+    expect(status.textContent).toBe('')
+  })
+
+  it('describes the keyboard path on the filter', async () => {
+    await renderLoaded()
+    expect(filterInput().getAttribute('aria-describedby')).toBeTruthy()
+    const description = document.getElementById(
+      filterInput().getAttribute('aria-describedby') ?? '',
+    )
+    expect(description?.textContent).toContain('Tab moves to results')
+  })
+})
+
 describe('settings', () => {
+  it('forces new tabs and hides the link setting in an installed app', async () => {
+    localStorage.setItem('pin.settings.v1', JSON.stringify({ linkTarget: 'same' }))
+    const browserTab = window.matchMedia
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      ...browserTab(query),
+      matches: query === '(display-mode: standalone)',
+    }))
+    await renderLoaded()
+    expect(grafanaLink().target).toBe('_blank')
+    expect(grafanaLink().rel).toBe('noopener')
+    expect(screen.queryByRole('radio', { name: 'Same tab', hidden: true })).toBeNull()
+  })
+
   it('opens links in a new tab by default and the same tab when chosen', async () => {
     await renderLoaded()
     expect(grafanaLink().target).toBe('_blank')

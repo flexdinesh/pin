@@ -71,10 +71,23 @@ function write(settings: Settings): void {
   }
 }
 
+const themeColors = { light: '#ffffff', dark: '#06070b' }
+
+// An installed app's title bar follows these, so an explicit theme has to override both.
+function applyThemeColor(theme: Theme): void {
+  const set = (scheme: keyof typeof themeColors) =>
+    document
+      .querySelector(`meta[name="theme-color"][media*="${scheme}"]`)
+      ?.setAttribute('content', themeColors[theme === 'system' ? scheme : theme])
+  set('light')
+  set('dark')
+}
+
 function applyToDocument(settings: Settings): void {
   const root = document.documentElement
   if (settings.theme === 'system') delete root.dataset.theme
   else root.dataset.theme = settings.theme
+  applyThemeColor(settings.theme)
 
   root.dataset.density = settings.density
 
@@ -90,10 +103,14 @@ function applyToDocument(settings: Settings): void {
 export type SettingsStore = {
   settings: Accessor<Settings>
   update: (patch: Partial<Settings>) => void
+  // True when running as an installed app, where links always leave the app window.
+  installed: boolean
+  linkTarget: Accessor<LinkTarget>
 }
 
 export function createSettings(): SettingsStore {
   const [settings, setSettings] = createSignal(read())
+  const installed = window.matchMedia('(display-mode: standalone)').matches
 
   createEffect(() => applyToDocument(settings()))
 
@@ -110,5 +127,7 @@ export function createSettings(): SettingsStore {
       setSettings(next)
       write(next)
     },
+    installed,
+    linkTarget: () => (installed ? 'new' : settings().linkTarget),
   }
 }
