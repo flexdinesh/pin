@@ -1,0 +1,9 @@
+**/node_modules
+apps/server/internal/webui/dist/*
+!apps/server/internal/webui/dist/.gitkeep
+bin/
+.env
+.git
+.scratch
+**/.impeccable
+**/coverage

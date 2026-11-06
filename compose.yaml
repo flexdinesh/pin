@@ -1,0 +1,10 @@
+services:
+  pin:
+    build: .
+    image: pin:local
+    restart: unless-stopped
+    ports:
+      - "${PIN_PORT:-8080}:8080"
+    volumes:
+      # Set PIN_CONFIG_FILE to your own file. pin reads it at startup, so restart after editing.
+      - ${PIN_CONFIG_FILE:-./pin.example.yaml}:/config/pin.yaml:ro
