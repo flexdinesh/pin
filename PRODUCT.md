@@ -16,7 +16,7 @@ One self-hoster running a homelab, plus anyone on their network. They open pin m
 
 ## Product Purpose
 
-pin shows a dashboard of bookmarks in flat groups, from one YAML file. It replaces a gethomepage deployment for people who use it only for links. Success is reaching any link in a glance or a couple of keystrokes.
+pin shows a dashboard of bookmarks in flat groups, from one YAML file. Success is reaching any link in a glance or a couple of keystrokes.
 
 ## Positioning
 

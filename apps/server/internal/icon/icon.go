@@ -1,5 +1,5 @@
 // Package icon resolves icon strings from a pin config into something a
-// browser can load, using the same sources as gethomepage.
+// browser can load.
 package icon
 
 import (

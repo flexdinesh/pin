@@ -35,7 +35,7 @@ bookmarks:
 
 ### Icons
 
-The same naming as gethomepage. Browsers load icons directly from these sources, so named icons need internet access. A bookmark whose icon is missing or fails to load shows its first letter instead.
+Browsers load icons directly from these sources, so named icons need internet access. A bookmark whose icon is missing or fails to load shows its first letter instead.
 
 | Value | Source |
 | --- | --- |
