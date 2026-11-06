@@ -1,0 +1,55 @@
+# Example pin config. Mount your own file at /config/pin.yaml.
+# Every name, host and link below is synthetic.
+title: Example Dashboard
+
+bookmarks:
+  # Named icon from dashboard-icons.
+  - name: Grafana
+    url: https://grafana.example.com
+    group: Monitoring
+    icon: grafana
+    description: Metrics and dashboards
+
+  - name: Prometheus
+    url: https://prometheus.example.com
+    group: Monitoring
+    icon: prometheus.svg
+    description: Metrics storage
+
+  # Material Design icon, tinted with the theme.
+  - name: Reader
+    url: https://reader.example.com
+    group: Apps
+    icon: mdi-rss
+    description: Feed reader
+
+  # Material Design icon with a fixed color.
+  - name: Notes
+    url: https://notes.example.com
+    group: Apps
+    icon: mdi-note-text-#7c6cf2
+    description: Personal notes
+
+  # Simple Icons.
+  - name: Source
+    url: https://github.com/example
+    group: Apps
+    icon: si-github
+    description: Source code
+
+  # selfh.st icon.
+  - name: Home Assistant
+    url: https://home.example.com
+    group: Home
+    icon: sh-home-assistant.svg
+    description: Home automation
+
+  # Direct icon URL.
+  - name: Wiki
+    url: https://wiki.example.com
+    group: Home
+    icon: https://wiki.example.com/favicon.svg
+
+  # Without group or icon: listed last, shown with a monogram.
+  - name: Router
+    url: http://192.168.1.1

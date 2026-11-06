@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#06070b" />
+    <title>pin</title>
+    <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
+    <link rel="preload" href="/api/config" as="fetch" crossorigin="anonymous" />
+    <script>
+      // Applies an explicit theme before first paint. Keep the key in sync with settings.ts.
+      try {
+        const theme = JSON.parse(localStorage.getItem('pin.settings.v1') ?? '{}').theme
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme
+      } catch {
+        // Unavailable or corrupt storage falls back to the system theme.
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,76 @@
+# `mise tasks` lists tasks, `mise run <task>` runs one.
+min_version = "2026.10.18"
+
+[settings]
+lockfile = true
+lockfile_platforms = ["linux-x64", "linux-arm64", "macos-arm64"]
+
+[tools]
+go = "1.27.3"
+node = "26.13.0"
+pnpm = "12.18.0"
+
+[env]
+# Never let go switch to another toolchain behind the pinned one.
+GOTOOLCHAIN = "local"
+
+[tasks.setup]
+description = "Install Go and web dependencies"
+run = ["go -C apps/server mod download", "pnpm install --frozen-lockfile"]
+
+[tasks.dev]
+description = "Run the Go server and Vite together"
+depends = ["dev:server", "dev:web"]
+
+[tasks."dev:server"]
+description = "Run the Go server on :8080 against pin.example.yaml"
+dir = "{{config_root}}/apps/server"
+env = { PIN_CONFIG = "{{config_root}}/pin.example.yaml" }
+run = "go run ./cmd/pin serve"
+
+[tasks."dev:web"]
+description = "Run Vite on :5173; proxies /api to dev:server"
+run = "pnpm -C apps/web dev"
+
+[tasks.build]
+description = "Build the web app, then the server binary with it embedded"
+run = [
+  "pnpm -C apps/web build",
+  "go -C apps/server build -trimpath -o {{config_root}}/bin/pin ./cmd/pin",
+]
+
+[tasks.fmt]
+description = "Format Go and web sources"
+run = ["gofmt -w apps/server", "pnpm exec oxfmt ."]
+
+[tasks."fmt:check"]
+description = "Check formatting without editing files"
+run = ['''
+  unformatted=$(gofmt -l apps/server)
+  if [ -n "$unformatted" ]; then
+    printf '%s\n' "$unformatted" >&2
+    exit 1
+  fi
+  ''', "pnpm exec oxfmt --check ."]
+
+[tasks.lint]
+description = "Run static analysis"
+run = ["go -C apps/server vet ./...", "pnpm exec oxlint"]
+
+[tasks.typecheck]
+description = "Typecheck the web app"
+run = "pnpm -C apps/web typecheck"
+
+[tasks.test]
+description = "Run web tests, build embedded assets, then run Go tests against them"
+run = ["pnpm -C apps/web test", "pnpm -C apps/web build", "go -C apps/server test ./..."]
+
+[tasks.check]
+description = "Format check, lint, typecheck, test and build"
+run = [
+  { task = "fmt:check" },
+  { task = "lint" },
+  { task = "typecheck" },
+  { task = "test" },
+  { task = "build" },
+]
