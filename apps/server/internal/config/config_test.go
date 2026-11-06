@@ -77,7 +77,7 @@ func TestParseRejectsAndNamesTheEntry(t *testing.T) {
 		{"javascript url", "{name: A, url: 'javascript:alert(1)'}", "must be http or https"},
 		{"relative url", "{name: A, url: /x}", "must be http or https"},
 		{"url without host", "{name: A, url: 'https://'}", "missing host"},
-		{"gethomepage href key", "{name: A, href: 'https://a.test'}", `unknown key "href"`},
+		{"href key", "{name: A, href: 'https://a.test'}", `unknown key "href"`},
 		{"widget key", "{name: A, url: 'https://a.test', widget: {type: x}}", "widget"},
 		{"local icon", "{name: A, url: 'https://a.test', icon: /icons/a.png}", "local icon paths"},
 		{"bad icon", "{name: A, url: 'https://a.test', icon: 'a b'}", "invalid icon name"},
