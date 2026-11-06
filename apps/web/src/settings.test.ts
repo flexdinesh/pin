@@ -1,5 +1,5 @@
 import { createRoot } from 'solid-js'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createSettings, defaultSettings, parseSettings, storageKey } from './settings'
 
 describe('parseSettings', () => {
@@ -26,6 +26,11 @@ const withStore = (run: (store: ReturnType<typeof createSettings>) => void) =>
     run(createSettings())
     dispose()
   })
+
+const colors = () =>
+  [...document.querySelectorAll('meta[name="theme-color"]')].map((meta) =>
+    meta.getAttribute('content'),
+  )
 
 describe('createSettings', () => {
   it('persists updates and restores them', () => {
@@ -57,5 +62,50 @@ describe('createSettings', () => {
       window.dispatchEvent(new StorageEvent('storage', { key: 'other', newValue: '{}' }))
       expect(store.settings()).toEqual(defaultSettings)
     })
+  })
+
+  it('makes the browser theme color follow an explicit theme', () => {
+    document.head.innerHTML = `
+      <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+      <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#06070b" />`
+    const { store, dispose } = createRoot((disposeRoot) => ({
+      store: createSettings(),
+      dispose: disposeRoot,
+    }))
+
+    store.update({ theme: 'dark' })
+    expect(colors()).toEqual(['#06070b', '#06070b'])
+    store.update({ theme: 'light' })
+    expect(colors()).toEqual(['#ffffff', '#ffffff'])
+    store.update({ theme: 'system' })
+    expect(colors()).toEqual(['#ffffff', '#06070b'])
+
+    dispose()
+    document.head.innerHTML = ''
+  })
+})
+
+describe('link target', () => {
+  it('uses the setting in a browser tab', () => {
+    withStore((store) => {
+      store.update({ linkTarget: 'same' })
+      expect(store.installed).toBe(false)
+      expect(store.linkTarget()).toBe('same')
+    })
+  })
+
+  it('always opens new in an installed app, without changing the stored setting', () => {
+    localStorage.setItem(storageKey, JSON.stringify({ linkTarget: 'same' }))
+    const browserTab = window.matchMedia
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      ...browserTab(query),
+      matches: query === '(display-mode: standalone)',
+    }))
+    withStore((store) => {
+      expect(store.installed).toBe(true)
+      expect(store.linkTarget()).toBe('new')
+      expect(store.settings().linkTarget).toBe('same')
+    })
+    vi.restoreAllMocks()
   })
 })

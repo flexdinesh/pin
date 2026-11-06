@@ -22,6 +22,10 @@
   --cell-gap: 12px;
   --icon-size: 26px;
   --gutter: clamp(16px, 2vw, 24px);
+  --bar-height: 55px;
+
+  /* Keeps a focused link clear of the sticky bar. */
+  scroll-padding-top: calc(var(--bar-height) + 8px);
 
   font-family: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-size: 14px;
@@ -99,6 +103,15 @@ input {
   outline-offset: 2px;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Top bar */
 
 .bar {
@@ -135,7 +148,14 @@ input {
   text-overflow: ellipsis;
 }
 
+.bar > .icon-button {
+  grid-row: 1;
+  grid-column: 3;
+}
+
 .filter {
+  grid-row: 1;
+  grid-column: 2;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -388,7 +408,12 @@ input {
   outline-offset: -2px;
 }
 
-.cell.top {
+.cell.filtered:focus-visible {
+  background: var(--accent-wash);
+}
+
+/* The signal marks what Enter will open, which is the focused result once there is one. */
+.groups:not(:has(.cell:focus-visible)) .cell.top {
   background: var(--accent-wash);
   box-shadow: inset 0 0 0 1px var(--accent-line);
 }
@@ -419,6 +444,11 @@ input {
   padding: 2px 4px;
   border: 1px solid var(--accent-line);
   color: var(--accent);
+}
+
+.cell:not(.top, :focus-visible) .enter-hint,
+.groups:has(.cell:focus-visible) .cell.top:not(:focus-visible) .enter-hint {
+  display: none;
 }
 
 .icon {
@@ -490,6 +520,10 @@ input {
 /* Touch */
 
 @media (pointer: coarse) {
+  :root {
+    --bar-height: 67px;
+  }
+
   .filter input {
     font-size: 16px;
   }
@@ -529,8 +563,16 @@ input {
 /* Phone */
 
 @media (max-width: 640px) {
+  :root {
+    --bar-height: 97px;
+  }
+
   .bar {
     grid-template-columns: 1fr auto;
+  }
+
+  .bar > .icon-button {
+    grid-column: 2;
   }
 
   .filter {
@@ -550,6 +592,12 @@ input {
     white-space: normal;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+  }
+}
+
+@media (max-width: 640px) and (pointer: coarse) {
+  :root {
+    --bar-height: 119px;
   }
 }
 
