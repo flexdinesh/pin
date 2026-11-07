@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@solidjs/testing-library'
+import { cleanup, fireEvent, render, screen, waitFor } from '@solidjs/testing-library'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Config } from './api'
@@ -37,6 +37,15 @@ const grafanaLink = () => screen.getByRole<HTMLAnchorElement>('link', { name: /G
 const filterInput = () => screen.getByRole<HTMLInputElement>('textbox')
 const focused = () => document.activeElement
 const stopNavigation = (event: MouseEvent) => event.preventDefault()
+const tagOf = (name: RegExp) => screen.getByRole('link', { name }).querySelector('.tag')
+const toggle = (name: string) => screen.getByRole('button', { name })
+
+// For configs whose first group starts collapsed, where renderLoaded would never find its link.
+async function renderWithInfrastructureFolded() {
+  stubFetch(respondWith(config))
+  render(() => <App />)
+  await screen.findByRole('link', { name: /Registry/ })
+}
 
 beforeEach(() => {
   document.title = ''
@@ -302,6 +311,155 @@ describe('keyboard path through results', () => {
       filterInput().getAttribute('aria-describedby') ?? '',
     )
     expect(description?.textContent).toContain('Tab moves to results')
+  })
+})
+
+describe('labels', () => {
+  const labelled: Config = {
+    title: 'Lab',
+    groups: [
+      {
+        name: 'Apps',
+        bookmarks: [
+          { name: 'Gitea', url: 'https://g.test/', label: { name: 'vpn', color: '#0ea5e9' } },
+          { name: 'Immich', url: 'https://i.test/', label: { name: 'beta' } },
+          { name: 'Notes', url: 'https://n.test/' },
+        ],
+      },
+    ],
+  }
+
+  async function renderLabelled() {
+    stubFetch(respondWith(labelled))
+    render(() => <App />)
+    await screen.findByRole('link', { name: /Gitea/ })
+  }
+
+  it('shows the name, and a color square only when one is configured', async () => {
+    await renderLabelled()
+    expect(tagOf(/Gitea/)?.querySelector('.tag-name')?.textContent).toBe('vpn')
+    const square = tagOf(/Gitea/)?.querySelector('.tag-color')
+    expect(square?.getAttribute('style')).toContain('background-color')
+    expect(tagOf(/Immich/)?.querySelector('.tag-name')?.textContent).toBe('beta')
+    expect(tagOf(/Immich/)?.querySelector('.tag-color')).toBeNull()
+    expect(tagOf(/Notes/)).toBeNull()
+  })
+
+  it('names the label in the link for assistive technology', async () => {
+    await renderLabelled()
+    // jsdom has no layout, so its computed name loses the space a browser keeps.
+    expect(screen.getByRole('link', { name: /Gitea.*Label:\s*vpn/ })).toBeTruthy()
+  })
+
+  it('filters by label and keeps the tag on the result', async () => {
+    await renderLabelled()
+    await userEvent.keyboard('vpn')
+    expect(linkNames().length).toBe(1)
+    expect(tagOf(/Gitea/)?.querySelector('.tag-name')?.textContent).toBe('vpn')
+  })
+
+  it('shows both the tag and the Enter hint on a labelled top match', async () => {
+    await renderLabelled()
+    await userEvent.keyboard('gitea')
+    const top = document.querySelector('[data-top-match]')
+    expect(top?.querySelector('.tag')).not.toBeNull()
+    expect(top?.querySelector('.enter-hint')).not.toBeNull()
+  })
+})
+
+describe('collapsing groups', () => {
+  const collapsedKey = 'pin.collapsed.v1'
+
+  it('starts open and folds a group from its title bar', async () => {
+    await renderLoaded()
+    expect(toggle('Infrastructure').getAttribute('aria-expanded')).toBe('true')
+    await userEvent.click(toggle('Infrastructure'))
+    expect(toggle('Infrastructure').getAttribute('aria-expanded')).toBe('false')
+    expect(screen.queryByRole('link', { name: /Grafana/ })).toBeNull()
+    expect(screen.getByRole('link', { name: /Registry/ })).toBeTruthy()
+    await userEvent.click(toggle('Infrastructure'))
+    expect(grafanaLink()).toBeTruthy()
+  })
+
+  it('keeps the count visible while collapsed', async () => {
+    await renderLoaded()
+    await userEvent.click(toggle('Infrastructure'))
+    const section = screen.getByRole('region', { name: 'Infrastructure' })
+    expect(section.querySelector('.group-count')?.textContent).toBe('2')
+  })
+
+  it('toggles from the keyboard and leaves folded links out of the Tab order', async () => {
+    await renderLoaded()
+    toggle('Infrastructure').focus()
+    await userEvent.keyboard('{Enter}')
+    expect(focused()).toBe(toggle('Infrastructure'))
+    await userEvent.tab()
+    expect(focused()).toBe(toggle('Development'))
+  })
+
+  it('survives a reload', async () => {
+    await renderLoaded()
+    await userEvent.click(toggle('Infrastructure'))
+    expect(JSON.parse(localStorage.getItem(collapsedKey) ?? '[]')).toEqual(['Infrastructure'])
+    cleanup()
+    await renderWithInfrastructureFolded()
+    expect(screen.queryByRole('link', { name: /Grafana/ })).toBeNull()
+  })
+
+  it('ignores unusable saved state', async () => {
+    localStorage.setItem(collapsedKey, '{not json')
+    await renderLoaded()
+    expect(toggle('Infrastructure').getAttribute('aria-expanded')).toBe('true')
+  })
+
+  it('never folds the ungrouped set', async () => {
+    localStorage.setItem(collapsedKey, JSON.stringify(['']))
+    stubFetch(
+      respondWith({
+        title: 'x',
+        groups: [{ name: '', bookmarks: [{ name: 'Loose', url: 'https://l.test/' }] }],
+      }),
+    )
+    render(() => <App />)
+    expect(await screen.findByRole('link', { name: /Loose/ })).toBeTruthy()
+    expect(screen.queryAllByRole('button', { name: '' })).toEqual([])
+  })
+
+  it('follows a change made in another tab', async () => {
+    await renderLoaded()
+    fireEvent(
+      window,
+      new StorageEvent('storage', { key: collapsedKey, newValue: '["Infrastructure"]' }),
+    )
+    expect(toggle('Infrastructure').getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('opens collapsed groups while filtering, then restores them', async () => {
+    localStorage.setItem(collapsedKey, JSON.stringify(['Infrastructure']))
+    await renderWithInfrastructureFolded()
+    await userEvent.keyboard('graf')
+    expect(grafanaLink()).toBeTruthy()
+    expect(toggle('Infrastructure').getAttribute('aria-expanded')).toBe('true')
+    await userEvent.keyboard('{Escape}')
+    expect(screen.queryByRole('link', { name: /Grafana/ })).toBeNull()
+    expect(toggle('Infrastructure').getAttribute('aria-expanded')).toBe('false')
+    expect(JSON.parse(localStorage.getItem(collapsedKey) ?? '[]')).toEqual(['Infrastructure'])
+  })
+
+  it('disables toggles while filtering, so Tab from the filter reaches results', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('r')
+    expect(toggle('Infrastructure')).toHaveProperty('disabled', true)
+    await userEvent.tab()
+    expect(focused()).toBe(grafanaLink())
+  })
+
+  it('starts filtering from a focused toggle', async () => {
+    await renderLoaded()
+    toggle('Infrastructure').focus()
+    await userEvent.keyboard('g')
+    expect(focused()).toBe(filterInput())
+    expect(filterInput().value).toBe('g')
   })
 })
 

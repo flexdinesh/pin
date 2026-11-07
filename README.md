@@ -1,6 +1,6 @@
 # pin
 
-Self-hosted bookmark dashboard driven by one YAML file. Links and flat groups only: no widgets, no accounts, no in-app editing.
+Self-hosted bookmark dashboard driven by one YAML file. Links, labels and flat groups only: no widgets, no accounts, no in-app editing.
 
 ## Run
 
@@ -16,15 +16,20 @@ pin has no authentication. Anyone who can reach it can read your links, so keep 
 
 ```yaml
 title: Homelab Dashboard    # optional, default "pin"
+labels:                     # optional
+  vpn: "#0ea5e9"            # color is optional, quoted #rrggbb
+  beta:
 bookmarks:
   - name: Grafana           # required
     url: https://grafana.example.com  # required, http or https
     group: Infrastructure   # optional
     icon: grafana           # optional
     description: Metrics    # optional
+    label: vpn              # optional, one label defined under labels
 ```
 
 - Groups appear in order of first use. Ungrouped bookmarks come last, with no heading.
+- A labelled bookmark shows a small tag with the label's name. A label not defined under `labels` counts as invalid.
 - pin reads the file at startup, so restart after editing.
 - A missing or invalid file stops startup, and every invalid entry is listed. Unknown keys count as invalid.
 
@@ -49,7 +54,8 @@ Local paths like `/icons/foo.png` are not supported.
 
 ## Use
 
-- Start typing anywhere to filter by name, description or group. Enter opens the top match, Tab moves to the results, and Esc clears.
+- Start typing anywhere to filter by name, description, label or group. Enter opens the top match, Tab moves to the results, and Esc clears.
+- Click a group's title bar to collapse it. Filtering still finds its links. Collapsed groups stay in that browser.
 - The cog sets theme, columns, density, link target and descriptions. Settings stay in that browser.
 
 ## Install

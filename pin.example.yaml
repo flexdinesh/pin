@@ -2,6 +2,11 @@
 # Every name, host and link below is synthetic.
 title: Example Dashboard
 
+# Labels bookmarks can use. Quote colors, or YAML reads them as comments.
+labels:
+  vpn: "#0ea5e9"
+  beta:
+
 bookmarks:
   # Named icon from dashboard-icons.
   - name: Grafana
@@ -10,18 +15,21 @@ bookmarks:
     icon: grafana
     description: Metrics and dashboards
 
+  # Label with a color.
   - name: Prometheus
     url: https://prometheus.example.com
     group: Monitoring
     icon: prometheus.svg
     description: Metrics storage
+    label: vpn
 
-  # Material Design icon, tinted with the theme.
+  # Material Design icon, tinted with the theme. Label without a color.
   - name: Reader
     url: https://reader.example.com
     group: Apps
     icon: mdi-rss
     description: Feed reader
+    label: beta
 
   # Material Design icon with a fixed color.
   - name: Notes

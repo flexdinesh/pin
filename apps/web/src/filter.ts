@@ -1,7 +1,7 @@
 import type { Bookmark, Group } from './api'
 
 // Every whitespace-separated term must appear in the bookmark's name,
-// description or group. Groups left without a match are dropped.
+// description, label or group. Groups left without a match are dropped.
 export function filterGroups(groups: Group[], query: string): Group[] {
   const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
   if (terms.length === 0) return groups
@@ -10,7 +10,8 @@ export function filterGroups(groups: Group[], query: string): Group[] {
     .map((group) => ({
       name: group.name,
       bookmarks: group.bookmarks.filter((bookmark) => {
-        const text = `${bookmark.name} ${bookmark.description ?? ''} ${group.name}`.toLowerCase()
+        const text =
+          `${bookmark.name} ${bookmark.description ?? ''} ${bookmark.label?.name ?? ''} ${group.name}`.toLowerCase()
         return terms.every((term) => text.includes(term))
       }),
     }))

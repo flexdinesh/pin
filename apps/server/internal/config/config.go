@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 
 	"go.yaml.in/yaml/v3"
@@ -17,6 +18,12 @@ import (
 )
 
 const defaultTitle = "pin"
+
+var (
+	colorPattern = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
+	// YAML reads an unquoted color as a comment, leaving the label silently colorless.
+	unquotedColorPattern = regexp.MustCompile(`^#[0-9a-fA-F]{6}\s*$`)
+)
 
 // Config is a validated dashboard.
 type Config struct {
@@ -36,6 +43,13 @@ type Bookmark struct {
 	URL         string     `json:"url"`
 	Description string     `json:"description,omitempty"`
 	Icon        *icon.Icon `json:"icon,omitempty"`
+	Label       *Label     `json:"label,omitempty"`
+}
+
+// Label marks a bookmark. An empty Color draws it in neutral ink.
+type Label struct {
+	Name  string `json:"name"`
+	Color string `json:"color,omitempty"`
 }
 
 // Load reads and parses the file at path.
@@ -57,6 +71,7 @@ func Load(path string) (Config, error) {
 func Parse(data []byte) (Config, error) {
 	var raw struct {
 		Title     string      `yaml:"title"`
+		Labels    yaml.Node   `yaml:"labels"`
 		Bookmarks []yaml.Node `yaml:"bookmarks"`
 	}
 	decoder := yaml.NewDecoder(bytes.NewReader(data))
@@ -65,14 +80,15 @@ func Parse(data []byte) (Config, error) {
 		return Config{}, err
 	}
 
+	labels, labelErrs := parseLabels(&raw.Labels)
 	var (
-		errs      []error
+		errs      = labelErrs
 		order     []string
 		grouped   = map[string][]Bookmark{}
 		ungrouped []Bookmark
 	)
 	for i := range raw.Bookmarks {
-		group, bookmark, err := parseEntry(&raw.Bookmarks[i])
+		group, bookmark, err := parseEntry(&raw.Bookmarks[i], labels)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("bookmarks[%d]: %w", i, err))
 			continue
@@ -103,7 +119,51 @@ func Parse(data []byte) (Config, error) {
 	return cfg, nil
 }
 
-func parseEntry(node *yaml.Node) (string, Bookmark, error) {
+// parseLabels keeps a label whose color is invalid, so bookmarks using it do not
+// also report it as unknown.
+func parseLabels(node *yaml.Node) (map[string]Label, []error) {
+	labels := map[string]Label{}
+	node = resolve(node)
+	if node.Kind == 0 || node.Tag == "!!null" {
+		return labels, nil
+	}
+	if node.Kind != yaml.MappingNode {
+		return labels, []error{errors.New("labels: must be a mapping")}
+	}
+
+	var errs []error
+	for i := 0; i+1 < len(node.Content); i += 2 {
+		key := node.Content[i]
+		name := strings.TrimSpace(key.Value)
+		if name == "" {
+			errs = append(errs, errors.New("labels: name must not be empty"))
+			continue
+		}
+		if _, seen := labels[name]; seen {
+			errs = append(errs, fmt.Errorf("labels: duplicate label %q", name))
+			continue
+		}
+		labels[name] = Label{Name: name}
+
+		value := node.Content[i+1]
+		color, err := scalar(value)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("labels.%s: %w", name, err))
+			continue
+		}
+		switch {
+		case color == "" && (unquotedColorPattern.MatchString(key.LineComment) || unquotedColorPattern.MatchString(value.LineComment)):
+			errs = append(errs, fmt.Errorf("labels.%s: quote the color, or YAML reads it as a comment", name))
+		case color != "" && !colorPattern.MatchString(color):
+			errs = append(errs, fmt.Errorf("labels.%s: color must be #rrggbb: %q", name, color))
+		default:
+			labels[name] = Label{Name: name, Color: color}
+		}
+	}
+	return labels, errs
+}
+
+func parseEntry(node *yaml.Node, labels map[string]Label) (string, Bookmark, error) {
 	node = resolve(node)
 	if node.Kind != yaml.MappingNode {
 		return "", Bookmark{}, errors.New("must be a mapping")
@@ -140,6 +200,16 @@ func parseEntry(node *yaml.Node) (string, Bookmark, error) {
 			rawIcon = value
 		case "description":
 			bookmark.Description = value
+		case "label":
+			if value == "" {
+				continue
+			}
+			label, known := labels[value]
+			if !known {
+				errs = append(errs, fmt.Errorf("label: unknown label %q", value))
+				continue
+			}
+			bookmark.Label = &label
 		default:
 			errs = append(errs, fmt.Errorf("unknown key %q", key))
 		}

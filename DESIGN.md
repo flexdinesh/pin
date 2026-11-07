@@ -137,6 +137,11 @@ components:
     textColor: "{colors.accent}"
     rounded: "{rounded.none}"
     padding: "2px 4px"
+  tag:
+    textColor: "{colors.text-2}"
+    typography: "{typography.count}"
+    rounded: "{rounded.none}"
+    padding: "1px 5px"
   monogram:
     textColor: "{colors.text-2}"
     rounded: "{rounded.none}"
@@ -161,7 +166,7 @@ components:
 
 The familiar dashboard grid, played straight and sharpened. Links sit in square tiles on precise lanes instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.
 
-The world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from two places only: the logos themselves, and a single amber signal that marks where input is and what Enter will do.
+The world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from three places only: the logos themselves, small squares on configured labels, and a single amber signal that marks where input is and what Enter will do.
 
 This system rejects sidebars, stat cards, hero headers, and soft shadows. It is a dashboard and does not pretend otherwise; the craft is in the precision of the grid rather than in a concept layered over it.
 
@@ -190,9 +195,9 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 - **Strip** (#f2f3f6, #11131c): Group title bars only.
 - **Hover Tint** (#0b0d140a, #c0caf50e): The hover and pressed fill on any interactive surface.
 - **Hairline** (#0b0d141a, #c0caf51c): Tile and title bar outlines, the bar's bottom edge, and dividers between settings.
-- **Firm Hairline** (#0b0d1438, #c0caf533): Control outlines (filter, buttons, segments, monogram) and the settings panel, which must separate from what it overlays.
+- **Firm Hairline** (#0b0d1438, #c0caf533): Control outlines (filter, buttons, segments, monogram), label tags, and the settings panel, which must separate from what it overlays.
 - **Ink** (#0b0d14, #e4e8f7): Link names, titles, and typed text.
-- **Soft Ink** (#454c5e, #a2aaca): Descriptions, group names, resting icons, and notice copy.
+- **Soft Ink** (#454c5e, #a2aaca): Descriptions, group names, label tags, resting icons, and notice copy.
 - **Faint Ink** (#5c6376, #8088aa): Counts, legends, placeholder, and the title separator. It holds at least 5.3:1 on every surface it appears on in both themes.
 - **Logo Halo** (#0b0d1459, #e4e8f7cc; second pass transparent, #e4e8f799): A tight outline behind image logos so a dark logo stays visible on dark panels and a light logo on light ones.
 
@@ -200,7 +205,7 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 
 **The One Signal Rule.** In the interface, amber marks only where input is and what Enter will do: focus, caret, selection, top match, and selected setting. It never decorates and never signals hover.
 
-**The Content Color Rule.** Hue beyond amber comes only from bookmark icons, including monochrome icons given their own configured color. Chrome stays neutral.
+**The Content Color Rule.** Hue beyond amber comes only from configured content: bookmark icons, including monochrome icons given their own color, and the square on a label given a color. Chrome stays neutral, and text never takes a configured color, so contrast holds for any value.
 
 ## Typography
 
@@ -217,7 +222,7 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 - **Control** (400, 12px, 1.4): Segment labels, stepping to 600 when selected.
 - **Label** (600, 11px, 0.1em, uppercase): Group names in title bars.
 - **Legend** (400, 10.5px, 0.1em, uppercase): The name of a settings group.
-- **Count** (400, 11px, tabular numerals): Group counts and the filter's match count.
+- **Count** (400, 11px, tabular numerals): Group counts, the filter's match count, and label tags, which keep the name as written.
 
 ### Named Rules
 
@@ -245,7 +250,7 @@ On a coarse pointer every control reaches at least 44px and the filter grows to 
 
 **The Lane Rule.** Inside a group, tiles sit on equal lanes and equal rows, 8px apart. A tile takes a second lane only when its content does not fit one.
 
-**The Everything Is Visible Rule.** All links are on the page at rest. The grid never paginates, collapses, or scrolls within a group.
+**The Everything Is Visible Rule.** All links are on the page at rest, unless the viewer folded their group. Groups start open, the filter reaches inside folded ones, and the grid never paginates or scrolls within a group.
 
 ## Elevation & Depth
 
@@ -321,10 +326,15 @@ The signature element. A whole-tile link at a 44px minimum height, with a hairli
 - **Focus:** The amber ring sits inside the tile (offset -2px).
 - **Top match:** While filtering, the cell Enter will open takes the amber wash, the softer amber ring, and a small outlined Enter hint at its far end. Coarse pointers hide the hint. Once a result has keyboard focus, Enter opens that result, so the wash and hint move to it and the top match returns to rest.
 - **Icon:** Multicolor logos and single-color masks share a contained box. When a source is missing or fails, a monogram stands in: the name's first letter or digit in weight 600 at half the icon size, in soft ink, in a bordered square.
+- **Label tag:** At the tile's far end, before any Enter hint, at rest and in results: the label's name in the Count role and soft ink, in a firm hairline outline, truncating past 16ch. A configured color adds a 6px square before the name. Its width counts when a tile is measured, so a tag can take a tile to a second lane.
 
 ### Group Header
 
-A full-width strip-toned title bar with a hairline outline, the group name at left and a count at far right. It sits 8px above its tiles and contains nothing else. While filtering, the count reads as shown over total.
+A full-width strip-toned title bar with a hairline outline: a 14px chevron and the group name at left, a count at far right. It sits 8px above its tiles and contains nothing else. While filtering, the count reads as shown over total.
+
+- **Fold:** The whole bar is one button, reaching 44px on coarse pointers. Hover and pressed add the hover tint, and focus draws the amber ring inside the bar. Folding removes the tiles at once, the chevron swaps without animating, and consecutive folded bars sit 8px apart. State is saved per browser.
+- **While filtering:** Matching groups show open whatever their saved state, and the bar is disabled with a faint chevron, so Tab from the filter reaches results directly.
+- **Ungrouped links:** No bar, so they never fold.
 
 ### Notice
 
@@ -354,6 +364,6 @@ The favicon's amber pin on the dark ground, in both themes. `apps/web/public/ico
 - **Don't** add shadows to surfaces. `box-shadow` only draws 1px zero-blur rules and inset rings, and the logo halo is the only blur.
 - **Don't** introduce a second typeface or a display or headline size.
 - **Don't** use amber for hover, decoration, or emphasis in copy.
-- **Don't** tint chrome with a second hue; logos are the only other color.
+- **Don't** tint chrome with a second hue; logos and configured label squares are the only other color.
 - **Don't** use tracked uppercase as a decorative line above other text.
 - **Don't** animate position, scale, or layout.

@@ -16,11 +16,11 @@ One self-hoster running a homelab, plus anyone on their network. They open pin m
 
 ## Product Purpose
 
-pin shows a dashboard of bookmarks in flat groups, from one YAML file. Success is reaching any link in a glance or a couple of keystrokes.
+pin shows a dashboard of labelled bookmarks in flat groups, from one YAML file. Success is reaching any link in a glance or a couple of keystrokes.
 
 ## Positioning
 
-Links and groups only: one file, no widgets, no status, no accounts. The server knows nothing about any viewer; each browser keeps its own layout and theme.
+Links, labels and groups only: one file, no widgets, no status, no accounts. The server knows nothing about any viewer; each browser keeps its own layout, theme and collapsed groups.
 
 ## Operating Context
 
@@ -31,13 +31,15 @@ Links and groups only: one file, no widgets, no status, no accounts. The server 
 
 ## Capabilities and Constraints
 
-- Bookmark fields: name, url, optional group, icon and description.
+- Bookmark fields: name, url, optional group, icon, description and label.
+- Labels are defined once at the top of the config, with an optional color. A bookmark has at most one, shown as a small tag.
 - Groups are flat and ordered by first appearance. Ungrouped links come last, with no heading.
+- A group's title bar collapses it, per browser. Groups start open, and filtering shows matches in collapsed groups.
 - Icon sources: dashboard-icons, `mdi-` and `si-` (monochrome, optional hex color), `sh-`, and http(s) URLs. Multicolor logos appear beside monochrome glyphs.
 - Settings, per browser: theme (system, light, dark), columns, density, link target, show descriptions.
-- Type anywhere to filter; Enter opens the top match and Tab moves to the results. Touch devices get a visible search control.
+- Type anywhere to filter by name, description, label or group; Enter opens the top match and Tab moves to the results. Touch devices get a visible search control.
 - Installable from the browser's own UI, with no in-app install control and no offline mode. The installed app always opens links outside its window and hides the link target setting.
-- No auth, no accounts, no in-app editing. No accent, collapse or reorder settings.
+- No auth, no accounts, no in-app editing. No accent or reorder settings. Collapsing is a direct toggle on the group, never a setting.
 
 ## Brand Commitments
 
