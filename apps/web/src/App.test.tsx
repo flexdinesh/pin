@@ -37,6 +37,7 @@ const grafanaLink = () => screen.getByRole<HTMLAnchorElement>('link', { name: /G
 const filterInput = () => screen.getByRole<HTMLInputElement>('textbox')
 const focused = () => document.activeElement
 const stopNavigation = (event: MouseEvent) => event.preventDefault()
+const gatusLink = () => screen.findByRole('link', { name: /Gatus/ })
 const tagOf = (name: RegExp) => screen.getByRole('link', { name }).querySelector('.tag')
 const toggle = (name: string) => screen.getByRole('button', { name })
 
@@ -516,5 +517,78 @@ describe('settings', () => {
     await renderLoaded()
     fireEvent.keyDown(screen.getByRole('radio', { name: 'Dark', hidden: true }), { key: 'x' })
     expect(document.activeElement).not.toBe(screen.getByRole('textbox'))
+  })
+})
+
+describe('widget tile', () => {
+  const widgetConfig: Config = {
+    title: 'Lab',
+    groups: [
+      {
+        name: 'Infra',
+        bookmarks: [
+          { name: 'Grafana', url: 'https://grafana.test/' },
+          {
+            name: 'Gatus',
+            url: 'https://gatus.test/',
+            widget: { id: '0', type: 'gatus' },
+          },
+        ],
+      },
+    ],
+  }
+
+  function renderWidget(status: () => Promise<Response>) {
+    const fetchStub = vi.fn((input: RequestInfo | URL) =>
+      input === '/api/config' ? Promise.resolve(Response.json(widgetConfig)) : status(),
+    )
+    vi.stubGlobal('fetch', fetchStub)
+    render(() => <App />)
+    return fetchStub
+  }
+
+  it('keeps the whole tile one link and names the counts', async () => {
+    renderWidget(() => Promise.resolve(Response.json({ up: 12, down: 2 })))
+    await screen.findByRole('link', { name: /12 up/ })
+    const link = await gatusLink()
+    expect(link.getAttribute('href')).toBe('https://gatus.test/')
+    expect(link.textContent).toContain('12 up')
+    expect(link.textContent).toContain('2 down')
+    expect(link.querySelector('.readout-down')?.textContent).toContain('2 down')
+  })
+
+  it('stays quiet when nothing is down', async () => {
+    renderWidget(() => Promise.resolve(Response.json({ up: 14, down: 0 })))
+    const link = await screen.findByRole('link', { name: /14 up/ })
+    expect(link.querySelector('.readout-down')).toBeNull()
+    expect(link.querySelector('.readout-quiet')?.textContent).toContain('0 down')
+  })
+
+  it('claims no status while loading', async () => {
+    renderWidget(() => new Promise(() => undefined))
+    const link = await gatusLink()
+    expect(link.querySelector('.readout')?.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('says so when Gatus cannot be reached, and the link still works', async () => {
+    renderWidget(() => Promise.resolve(new Response('widget unavailable', { status: 502 })))
+    const link = await screen.findByRole('link', { name: /Can't reach Gatus/ })
+    expect(link.getAttribute('href')).toBe('https://gatus.test/')
+  })
+
+  it('does not refetch or lose the counts while filtering', async () => {
+    const fetchStub = renderWidget(() => Promise.resolve(Response.json({ up: 12, down: 2 })))
+    await screen.findByRole('link', { name: /12 up/ })
+    const before = fetchStub.mock.calls.length
+    await userEvent.type(filterInput(), 'gat')
+    expect(fetchStub.mock.calls.length).toBe(before)
+    expect((await gatusLink()).textContent).toContain('12 up')
+  })
+
+  it('does not filter on the counts', async () => {
+    renderWidget(() => Promise.resolve(Response.json({ up: 12, down: 2 })))
+    await screen.findByRole('link', { name: /12 up/ })
+    await userEvent.type(filterInput(), 'down')
+    expect(screen.queryByRole('link', { name: /Gatus/ })).toBeNull()
   })
 })

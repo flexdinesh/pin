@@ -25,6 +25,7 @@ import { filterGroups, topMatch } from './filter'
 import { createSettings, type SettingsStore } from './settings'
 import { SettingsPanel } from './SettingsPanel'
 import { fitTiles, keepTilesFitted } from './tiles'
+import { createWidgetStore, type WidgetState, type WidgetStore } from './widgets'
 
 const settingsPanelId = 'settings-panel'
 const filterHintId = 'filter-hint'
@@ -32,53 +33,100 @@ const filterHintId = 'filter-hint'
 const countBookmarks = (groups: Group[]) =>
   groups.reduce((total, group) => total + group.bookmarks.length, 0)
 
+function ReadoutCell(props: { value: string; label: string; class?: string }) {
+  return (
+    <span class={`readout-cell ${props.class ?? ''}`}>
+      <span class="readout-value">{props.value}</span> {props.label}
+    </span>
+  )
+}
+
+function WidgetReadout(props: { state: WidgetState }) {
+  return (
+    <Switch>
+      <Match when={props.state.kind === 'unreachable'}>
+        <span class="readout readout-off">Can't reach Gatus</span>
+      </Match>
+      <Match when={props.state.kind === 'loading'}>
+        {/* Nothing is known yet, so the link's name carries no status. */}
+        <span class="readout" aria-hidden="true">
+          <ReadoutCell value="–" label="up" class="readout-quiet" />
+          <ReadoutCell value="–" label="down" class="readout-quiet" />
+        </span>
+      </Match>
+      <Match when={props.state.kind === 'ready' && props.state}>
+        {(ready) => (
+          <span class="readout">
+            <ReadoutCell value={String(ready().up)} label="up" />
+            <ReadoutCell
+              value={String(ready().down)}
+              label="down"
+              class={ready().down > 0 ? 'readout-down' : 'readout-quiet'}
+            />
+          </span>
+        )}
+      </Match>
+    </Switch>
+  )
+}
+
 function BookmarkCell(props: {
   bookmark: Bookmark
   top: boolean
   filtering: boolean
   store: SettingsStore
+  widgets: WidgetStore
 }) {
   const settings = () => props.store.settings()
   return (
     <li>
       <a
         class="cell"
-        classList={{ top: props.top, filtered: props.filtering }}
+        classList={{
+          top: props.top,
+          filtered: props.filtering,
+          'cell-widget': props.bookmark.widget !== undefined,
+        }}
         href={props.bookmark.url}
         target={props.store.linkTarget() === 'new' ? '_blank' : undefined}
         rel={props.store.linkTarget() === 'new' ? 'noopener' : undefined}
         title={props.bookmark.description}
         data-top-match={props.top ? '' : undefined}
       >
-        <BookmarkIcon name={props.bookmark.name} icon={props.bookmark.icon} />
-        <span class="cell-text">
-          <span class="cell-name">{props.bookmark.name}</span>
-          <Show when={settings().showDescriptions && props.bookmark.description}>
-            <span class="cell-description">{props.bookmark.description}</span>
+        <span class="cell-main">
+          <BookmarkIcon name={props.bookmark.name} icon={props.bookmark.icon} />
+          <span class="cell-text">
+            <span class="cell-name">{props.bookmark.name}</span>
+            <Show when={settings().showDescriptions && props.bookmark.description}>
+              <span class="cell-description">{props.bookmark.description}</span>
+            </Show>
+          </span>
+          <Show when={props.bookmark.label}>
+            {(label) => (
+              <span class="tag" title={label().name}>
+                <span class="visually-hidden">Label: </span>
+                <Show when={label().color}>
+                  {(color) => (
+                    <span
+                      class="tag-color"
+                      style={{ 'background-color': color() }}
+                      aria-hidden="true"
+                    />
+                  )}
+                </Show>
+                <span class="tag-name">{label().name}</span>
+              </span>
+            )}
+          </Show>
+          {/* CSS shows it on the cell Enter would open: the top match or the focused cell. */}
+          <Show when={props.filtering}>
+            <kbd class="enter-hint" aria-hidden="true">
+              <CornerDownLeft size={13} stroke-width={1.75} />
+            </kbd>
           </Show>
         </span>
-        <Show when={props.bookmark.label}>
-          {(label) => (
-            <span class="tag" title={label().name}>
-              <span class="visually-hidden">Label: </span>
-              <Show when={label().color}>
-                {(color) => (
-                  <span
-                    class="tag-color"
-                    style={{ 'background-color': color() }}
-                    aria-hidden="true"
-                  />
-                )}
-              </Show>
-              <span class="tag-name">{label().name}</span>
-            </span>
-          )}
-        </Show>
-        {/* CSS shows it on the cell Enter would open: the top match or the focused cell. */}
-        <Show when={props.filtering}>
-          <kbd class="enter-hint" aria-hidden="true">
-            <CornerDownLeft size={13} stroke-width={1.75} />
-          </kbd>
+        <Show when={props.bookmark.widget}>
+          {(widget) => <WidgetReadout state={props.widgets.stateOf(widget().id)} />}
         </Show>
       </a>
     </li>
@@ -90,6 +138,7 @@ function GroupTiles(props: {
   top: Bookmark | undefined
   filtering: boolean
   store: SettingsStore
+  widgets: WidgetStore
 }) {
   const [list, setList] = createSignal<HTMLUListElement>()
   // Settings change the lanes and the text. The filter adds the Enter hint.
@@ -114,6 +163,7 @@ function GroupTiles(props: {
             top={bookmark === props.top}
             filtering={props.filtering}
             store={props.store}
+            widgets={props.widgets}
           />
         )}
       </For>
@@ -128,6 +178,7 @@ function GroupPanel(props: {
   filtering: boolean
   store: SettingsStore
   collapse: CollapseStore
+  widgets: WidgetStore
 }) {
   const count = () =>
     props.total === undefined
@@ -170,6 +221,7 @@ function GroupPanel(props: {
           top={props.top}
           filtering={props.filtering}
           store={props.store}
+          widgets={props.widgets}
         />
       </Show>
     </section>
@@ -182,6 +234,7 @@ function Dashboard(props: {
   onClear: () => void
   store: SettingsStore
   collapse: CollapseStore
+  widgets: WidgetStore
 }) {
   const visible = createMemo(() => filterGroups(props.config.groups, props.query))
   const filtering = () => props.query.trim() !== ''
@@ -217,6 +270,7 @@ function Dashboard(props: {
               filtering={filtering()}
               store={props.store}
               collapse={props.collapse}
+              widgets={props.widgets}
             />
           )}
         </For>
@@ -248,6 +302,13 @@ export function App() {
     input()?.focus()
   }
   const loaded = () => (config.state === 'ready' ? config() : undefined)
+  const widgetIds = createMemo(
+    () =>
+      loaded()?.groups.flatMap((group) =>
+        group.bookmarks.flatMap((bookmark) => (bookmark.widget ? [bookmark.widget.id] : [])),
+      ) ?? [],
+  )
+  const widgets = createWidgetStore(widgetIds)
   const matchCount = createMemo(() => {
     const current = loaded()
     return current ? countBookmarks(filterGroups(current.groups, query())) : 0
@@ -392,6 +453,7 @@ export function App() {
                 onClear={clearAndFocus}
                 store={store}
                 collapse={collapse}
+                widgets={widgets}
               />
             )}
           </Match>

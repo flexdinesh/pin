@@ -11,6 +11,7 @@ colors:
   text: "light-dark(#0b0d14, #e4e8f7)"
   text-2: "light-dark(#454c5e, #a2aaca)"
   text-3: "light-dark(#5c6376, #8088aa)"
+  down: "light-dark(#b91c1c, #f87171)"
   accent: "light-dark(#b45309, #fbbf24)"
   accent-wash: "light-dark(#b4530912, #fbbf2412)"
   accent-line: "light-dark(#b4530980, #fbbf2466)"
@@ -59,6 +60,12 @@ typography:
     fontSize: "11px"
     fontWeight: 400
     lineHeight: 1.4
+    fontFeature: "'tnum'"
+  figure:
+    fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
+    fontSize: "18px"
+    fontWeight: 600
+    lineHeight: "22px"
     fontFeature: "'tnum'"
 rounded:
   none: "0px"
@@ -142,6 +149,16 @@ components:
     typography: "{typography.count}"
     rounded: "{rounded.none}"
     padding: "1px 5px"
+  readout:
+    textColor: "{colors.text-2}"
+    typography: "{typography.count}"
+    rounded: "{rounded.none}"
+    padding: "4px 14px"
+  readout-figure:
+    textColor: "{colors.text}"
+    typography: "{typography.figure}"
+  readout-down:
+    textColor: "{colors.down}"
   monogram:
     textColor: "{colors.text-2}"
     rounded: "{rounded.none}"
@@ -166,9 +183,9 @@ components:
 
 The familiar dashboard grid, played straight and sharpened. Links sit in square tiles on precise lanes instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.
 
-The world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from three places only: the logos themselves, small squares on configured labels, and a single amber signal that marks where input is and what Enter will do.
+The world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from four places only: the logos themselves, small squares on configured labels, a single amber signal that marks where input is and what Enter will do, and red on a count of things that are down.
 
-This system rejects sidebars, stat cards, hero headers, and soft shadows. It is a dashboard and does not pretend otherwise; the craft is in the precision of the grid rather than in a concept layered over it.
+This system rejects sidebars, free-standing stat cards, hero headers, and soft shadows. It is a dashboard and does not pretend otherwise; the craft is in the precision of the grid rather than in a concept layered over it.
 
 **Key Characteristics:**
 
@@ -188,6 +205,10 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 - **Amber Wash** (#b4530912, #fbbf2412): The fill behind the top match and the selected setting.
 - **Amber Line** (#b4530980, #fbbf2466): The softer ring around the top match and the border of its Enter hint.
 
+### Status
+
+- **Down Red** (#b91c1c, #f87171): A widget's non-zero down count, figure and label together. The word "down" always accompanies it, so the state never depends on color alone.
+
 ### Neutral
 
 - **Ground** (#ffffff, #06070b): The page and sticky bar.
@@ -205,7 +226,9 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 
 **The One Signal Rule.** In the interface, amber marks only where input is and what Enter will do: focus, caret, selection, top match, and selected setting. It never decorates and never signals hover.
 
-**The Content Color Rule.** Hue beyond amber comes only from configured content: bookmark icons, including monochrome icons given their own color, and the square on a label given a color. Chrome stays neutral, and text never takes a configured color, so contrast holds for any value.
+**The Content Color Rule.** Hue beyond amber and Down Red comes only from configured content: bookmark icons, including monochrome icons given their own color, and the square on a label given a color. Chrome stays neutral, and text never takes a configured color, so contrast holds for any value.
+
+**The Down Rule.** Red marks only a count of things that are down, and only above zero. A healthy dashboard shows no red, and a zero stays in faint ink.
 
 ## Typography
 
@@ -222,7 +245,8 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 - **Control** (400, 12px, 1.4): Segment labels, stepping to 600 when selected.
 - **Label** (600, 11px, 0.1em, uppercase): Group names in title bars.
 - **Legend** (400, 10.5px, 0.1em, uppercase): The name of a settings group.
-- **Count** (400, 11px, tabular numerals): Group counts, the filter's match count, and label tags, which keep the name as written.
+- **Count** (400, 11px, tabular numerals): Group counts, the filter's match count, label tags, which keep the name as written, and readout labels.
+- **Figure** (600, 18px, 22px line, tabular numerals): A widget's live counts, and nothing else. It sets the system's one step above Title.
 
 ### Named Rules
 
@@ -238,7 +262,7 @@ A single full-width column of groups in config order, with a gutter of 16px to 2
 
 The sticky bar is a three-track grid: title at left, filter in the middle at up to 420px, settings control at far right. At 640px and below, the filter drops to its own full-width row under the title and settings control. The settings control comes before the filter in the DOM and is placed by the grid, so Tab from the filter reaches the results directly. The document's top scroll padding follows the bar's height, so a focused link never sits under it.
 
-Tiles use an auto-filling grid of lanes with a minimum track that responds to the viewport (160px to 244px, or 150px to 190px at compact density), 8px apart. A chosen column count caps the lanes at that number, and they narrow to 150px before a lane drops. Rows are equal within a group, so tile tops line up across lanes. Phones target two lanes; below 360px the minimum track falls to 130px to hold them.
+Tiles use an auto-filling grid of lanes with a minimum track that responds to the viewport (160px to 244px, or 150px to 190px at compact density), 8px apart. A chosen column count caps the lanes at that number, and they narrow to 150px before a lane drops. Each row takes the height of its tallest tile, which its neighbors stretch to match, so tile tops line up across lanes. Phones target two lanes; below 360px the minimum track falls to 130px to hold them.
 
 A tile whose content does not fit one lane takes two. The content is measured because it depends on rendered text, and grid placement does the rest, so tiles keep config order. A two-lane tile that does not fit at a row's end moves to the next row and leaves its lane open, as do empty lanes in the last row. There is no filler.
 
@@ -248,7 +272,7 @@ On a coarse pointer every control reaches at least 44px and the filter grows to 
 
 ### Named Rules
 
-**The Lane Rule.** Inside a group, tiles sit on equal lanes and equal rows, 8px apart. A tile takes a second lane only when its content does not fit one.
+**The Lane Rule.** Inside a group, tiles sit on equal lanes, in rows sized to their tallest tile, 8px apart. A tile takes a second lane only when its content does not fit one.
 
 **The Everything Is Visible Rule.** All links are on the page at rest, unless the viewer folded their group. Groups start open, the filter reaches inside folded ones, and the grid never paginates or scrolls within a group.
 
@@ -328,6 +352,17 @@ The signature element. A whole-tile link at a 44px minimum height, with a hairli
 - **Icon:** Multicolor logos and single-color masks share a contained box. When a source is missing or fails, a monogram stands in: the name's first letter or digit in weight 600 at half the icon size, in soft ink, in a bordered square.
 - **Label tag:** At the tile's far end, before any Enter hint, at rest and in results: the label's name in the Count role and soft ink, in a firm hairline outline, truncating past 16ch. A configured color adds a 6px square before the name. Its width counts when a tile is measured, so a tag can take a tile to a second lane.
 
+### Widget Readout
+
+The bottom of a bookmark cell whose bookmark has a widget, inside the same link. Two equal cells under the name row, split by hairlines that run to the tile's edges with no gutter: a figure and its label on one baseline.
+
+- **Healthy:** Up in ink. A zero down in faint ink.
+- **Down:** A non-zero down count takes Down Red, and its label steps from Count weight to 600.
+- **Loading:** Dashes in faint ink, hidden from assistive technology. Nothing moves.
+- **Unreachable:** One line in faint ink, "Can't reach Gatus", at the same height. The link still works, and old counts never stay on screen.
+- **Top match and focus:** The whole tile takes them as any cell does; the readout adds nothing.
+- **Layout:** Excluded when a tile is measured, so counts arriving or changing never move it to another lane. The whole tile keeps its height between refreshes. A group holding a widget aligns every tile's content to the top, so names share a line. In a narrow lane the figure holds and its label clips. Counts refresh without a live region, so a screen reader is not interrupted.
+
 ### Group Header
 
 A full-width strip-toned title bar with a hairline outline: a 14px chevron and the group name at left, a count at far right. It sits 8px above its tiles and contains nothing else. While filtering, the count reads as shown over total.
@@ -356,14 +391,15 @@ The favicon's amber pin on the dark ground, in both themes. `apps/web/public/ico
 - **Do** give a monogram fallback to anything that loads an external icon.
 - **Do** keep every control at 44px or more on coarse pointers.
 - **Do** match the existing 100ms ease-out for color and background transitions, and honor reduced motion.
+- **Do** put a widget's status inside the tile it describes, so it stays part of the link.
 
 ### Don't:
 
-- **Don't** add a sidebar, stat cards, or a hero header.
+- **Don't** add a sidebar, a stat card that is not a link, or a hero header.
 - **Don't** round corners on anything the system draws.
 - **Don't** add shadows to surfaces. `box-shadow` only draws 1px zero-blur rules and inset rings, and the logo halo is the only blur.
 - **Don't** introduce a second typeface or a display or headline size.
 - **Don't** use amber for hover, decoration, or emphasis in copy.
-- **Don't** tint chrome with a second hue; logos and configured label squares are the only other color.
+- **Don't** tint chrome with a second hue; logos, configured label squares and a non-zero down count are the only other color.
 - **Don't** use tracked uppercase as a decorative line above other text.
 - **Don't** animate position, scale, or layout.

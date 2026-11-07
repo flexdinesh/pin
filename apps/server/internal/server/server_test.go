@@ -200,6 +200,62 @@ func TestEmbeddedWebApp(t *testing.T) {
 	}
 }
 
+func newWidgetHandler(t *testing.T, gatus http.HandlerFunc) http.Handler {
+	t.Helper()
+	upstream := httptest.NewServer(gatus)
+	t.Cleanup(upstream.Close)
+	cfg, err := config.Parse([]byte("bookmarks:\n  - {name: A, url: 'https://a.test', widget: {type: gatus, url: '" + upstream.URL + "'}}\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler, err := New(cfg, fixtureAssets())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return handler
+}
+
+func TestWidgetRouteReturnsCounts(t *testing.T) {
+	handler := newWidgetHandler(t, func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`[{"results":[{"success":true}]},{"results":[{"success":false}]},{"results":[{"success":true}]}]`))
+	})
+	response := get(handler, http.MethodGet, "/api/widgets/0")
+	if response.Code != 200 {
+		t.Fatalf("status = %d", response.Code)
+	}
+	if got := response.Body.String(); got != `{"up":2,"down":1}` {
+		t.Errorf("body = %s", got)
+	}
+	if got := response.Header().Get("Content-Type"); got != "application/json" {
+		t.Errorf("content type = %q", got)
+	}
+	if got := response.Header().Get("Cache-Control"); got != "no-cache" {
+		t.Errorf("cache = %q", got)
+	}
+}
+
+func TestWidgetRouteRejectsUnknownID(t *testing.T) {
+	handler := newWidgetHandler(t, func(w http.ResponseWriter, r *http.Request) {
+		t.Error("upstream must not be called")
+	})
+	if got := get(handler, http.MethodGet, "/api/widgets/9").Code; got != 404 {
+		t.Errorf("status = %d, want 404", got)
+	}
+}
+
+func TestWidgetRouteHidesUpstreamFailures(t *testing.T) {
+	handler := newWidgetHandler(t, func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "secret upstream detail", http.StatusUnauthorized)
+	})
+	response := get(handler, http.MethodGet, "/api/widgets/0")
+	if response.Code != http.StatusBadGateway {
+		t.Fatalf("status = %d, want 502", response.Code)
+	}
+	if got := response.Body.String(); got != "widget unavailable\n" {
+		t.Errorf("body = %q", got)
+	}
+}
+
 func assertPNG(t *testing.T, handler http.Handler, path, sizes string) {
 	t.Helper()
 	response := get(handler, http.MethodGet, path)

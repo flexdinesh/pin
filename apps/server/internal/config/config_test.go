@@ -227,6 +227,80 @@ func TestExampleConfigIsValid(t *testing.T) {
 	}
 }
 
+func TestParseWidgets(t *testing.T) {
+	cfg, err := Parse([]byte(`
+bookmarks:
+  - {name: Plain, url: 'https://plain.test', group: B}
+  - {name: Later, url: 'https://later.test', group: B, widget: {type: gatus}}
+  - {name: First, url: 'https://first.test', group: A}
+  - name: Status
+    url: https://status.test
+    widget:
+      type: gatus
+      url: http://gatus.monitoring:8080
+  - {name: Empty, url: 'https://empty.test', widget: }
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, configured := range cfg.Widgets() {
+		got[configured.ID] = configured.Type + " " + configured.URL
+	}
+	want := map[string]string{
+		"0": "gatus https://later.test",
+		"1": "gatus http://gatus.monitoring:8080",
+	}
+	if len(got) != len(want) || got["0"] != want["0"] || got["1"] != want["1"] {
+		t.Errorf("widgets = %v, want %v", got, want)
+	}
+}
+
+func TestWidgetURLStaysOffTheWire(t *testing.T) {
+	cfg, err := Parse([]byte("bookmarks:\n  - {name: S, url: 'https://s.test', widget: {type: gatus, url: 'http://internal.test'}}\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(encoded), "internal.test") {
+		t.Errorf("config exposes the widget url: %s", encoded)
+	}
+	if !strings.Contains(string(encoded), `"widget":{"id":"0","type":"gatus"}`) {
+		t.Errorf("config = %s", encoded)
+	}
+}
+
+func TestParseRejectsBadWidgets(t *testing.T) {
+	cases := []struct {
+		name   string
+		widget string
+		want   string
+	}{
+		{"scalar", "gatus", "widget: must be a mapping"},
+		{"list", "[gatus]", "widget: must be a mapping"},
+		{"no type", "{url: 'https://g.test'}", "widget: type is required"},
+		{"unknown type", "{type: nope}", `widget: unknown type "nope"`},
+		{"unknown key", "{type: gatus, token: x}", `widget: unknown key "token"`},
+		{"duplicate key", "{type: gatus, type: gatus}", `widget: duplicate key "type"`},
+		{"bad scheme", "{type: gatus, url: 'ftp://g.test'}", "widget: url: must be http or https"},
+		{"nested url", "{type: gatus, url: [a]}", "widget: url: must be a single value"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := Parse([]byte("bookmarks:\n  - {name: A, url: 'https://a.test', widget: " + tc.widget + "}\n"))
+			if err == nil {
+				t.Fatal("want error")
+			}
+			if !strings.Contains(err.Error(), tc.want) {
+				t.Errorf("error = %q, want %q", err, tc.want)
+			}
+		})
+	}
+}
+
 func TestLoadReportsMissingFile(t *testing.T) {
 	if _, err := Load(filepath.Join(t.TempDir(), "absent.yaml")); err == nil {
 		t.Error("want error")

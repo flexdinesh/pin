@@ -139,6 +139,21 @@
           "oklch(95% 0.019 274)"
         ]
       },
+      "down": {
+        "role": "tertiary",
+        "displayName": "Down Red",
+        "canonical": "light-dark(#b91c1c, #f87171)",
+        "tonalRamp": [
+          "oklch(15% 0.060 25)",
+          "oklch(26% 0.100 25)",
+          "oklch(38% 0.150 25)",
+          "oklch(49% 0.190 25)",
+          "oklch(61% 0.190 25)",
+          "oklch(72% 0.150 25)",
+          "oklch(84% 0.080 25)",
+          "oklch(95% 0.025 25)"
+        ]
+      },
       "accent": {
         "role": "primary",
         "displayName": "Signal Amber",
@@ -246,7 +261,11 @@
       },
       "count": {
         "displayName": "Count",
-        "purpose": "Group counts and the filter match count, in tabular numerals."
+        "purpose": "Group counts, the filter match count and readout labels, in tabular numerals."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "A widget's live counts, in tabular numerals, and nothing else."
       }
     },
     "shadows": [
@@ -358,6 +377,14 @@
       "css": ".ds-cell { display: flex; align-items: center; gap: var(--cell-gap, 12px); height: 100%; min-height: 44px; padding: var(--cell-padding, 9px 14px); background: var(--panel); border: 1px solid var(--border); font-family: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.4; color: var(--text); text-decoration: none; transition: background-color 100ms ease-out; } .ds-cell:hover, .ds-cell:active { background: var(--hover); } .ds-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; } .ds-cell-icon { flex: none; display: grid; place-items: center; width: 26px; height: 26px; color: var(--text); } .ds-cell-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; } .ds-cell-name { font-weight: 500; overflow-wrap: anywhere; } .ds-cell-description { font-size: 12.5px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-monogram { display: grid; place-items: center; width: 100%; height: 100%; border: 1px solid var(--border-strong); font-size: 13px; font-weight: 600; color: var(--text-2); } .ds-cell-top, .ds-cell-top:hover { background: var(--accent-wash); box-shadow: inset 0 0 0 1px var(--accent-line); } .ds-enter-hint { flex: none; padding: 2px 4px; border: 1px solid var(--accent-line); color: var(--accent); }"
     },
     {
+      "name": "Widget Readout",
+      "kind": "custom",
+      "refersTo": "readout",
+      "description": "Live counts at the bottom of a widget's tile, inside the same link, split by hairlines that run to the tile's edges. A non-zero down count takes Down Red.",
+      "html": "<span class=\"ds-readout\"><span class=\"ds-readout-cell\"><span class=\"ds-readout-figure\">12</span> up</span><span class=\"ds-readout-cell ds-readout-down\"><span class=\"ds-readout-figure\">2</span> down</span></span>",
+      "css": ".ds-readout { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); font-family: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif; } .ds-readout-cell { display: flex; align-items: baseline; gap: 5px; padding: 4px 14px; font-size: 11px; color: var(--text-2); } .ds-readout-cell + .ds-readout-cell { border-left: 1px solid var(--border); } .ds-readout-figure { font-size: 18px; font-weight: 600; line-height: 22px; font-variant-numeric: tabular-nums; color: var(--text); } .ds-readout-down { font-weight: 600; color: var(--down); } .ds-readout-down .ds-readout-figure { color: var(--down); }"
+    },
+    {
       "name": "Label Tag",
       "kind": "chip",
       "refersTo": "tag",
@@ -384,7 +411,7 @@
   ],
   "narrative": {
     "northStar": "The Sharpened Grid",
-    "overview": "The familiar dashboard grid, played straight and sharpened. Links sit in square tiles on precise lanes instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.\n\nThe world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from three places only: the logos themselves, small squares on configured labels, and a single amber signal that marks where input is and what Enter will do.\n\nThis system rejects sidebars, stat cards, hero headers, and soft shadows. It is a dashboard and does not pretend otherwise; the craft is in the precision of the grid rather than in a concept layered over it.",
+    "overview": "The familiar dashboard grid, played straight and sharpened. Links sit in square tiles on precise lanes instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.\n\nThe world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from four places only: the logos themselves, small squares on configured labels, a single amber signal that marks where input is and what Enter will do, and red on a count of things that are down.\n\nThis system rejects sidebars, free-standing stat cards, hero headers, and soft shadows. It is a dashboard and does not pretend otherwise; the craft is in the precision of the grid rather than in a concept layered over it.",
     "keyCharacteristics": [
       "Square tiles on lanes, 8px apart, widening to two lanes only when their content needs it",
       "Neutral header strips with a small tracked uppercase group name and a tabular count",
@@ -400,7 +427,12 @@
       },
       {
         "name": "The Content Color Rule",
-        "body": "Hue beyond amber comes only from configured content: bookmark icons, including monochrome icons given their own color, and the square on a label given a color. Chrome stays neutral, and text never takes a configured color, so contrast holds for any value.",
+        "body": "Hue beyond amber and Down Red comes only from configured content: bookmark icons, including monochrome icons given their own color, and the square on a label given a color. Chrome stays neutral, and text never takes a configured color, so contrast holds for any value.",
+        "section": "colors"
+      },
+      {
+        "name": "The Down Rule",
+        "body": "Red marks only a count of things that are down, and only above zero. A healthy dashboard shows no red, and a zero stays in faint ink.",
         "section": "colors"
       },
       {
@@ -420,7 +452,7 @@
       },
       {
         "name": "The Lane Rule",
-        "body": "Inside a group, tiles sit on equal lanes and equal rows, 8px apart. A tile takes a second lane only when its content does not fit one.",
+        "body": "Inside a group, tiles sit on equal lanes, in rows sized to their tallest tile, 8px apart. A tile takes a second lane only when its content does not fit one.",
         "section": "layout"
       },
       {
@@ -450,7 +482,7 @@
       "match the existing 100ms ease-out for color and background transitions, and honor reduced motion."
     ],
     "donts": [
-      "add a sidebar, stat cards, or a hero header.",
+      "add a sidebar, a stat card that is not a link, or a hero header.",
       "round corners on anything the system draws.",
       "add shadows to surfaces. `box-shadow` only draws 1px zero-blur rules and inset rings, and the logo halo is the only blur.",
       "introduce a second typeface or a display or headline size.",

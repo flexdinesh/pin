@@ -10,6 +10,7 @@
   --text: light-dark(#0b0d14, #e4e8f7);
   --text-2: light-dark(#454c5e, #a2aaca);
   --text-3: light-dark(#5c6376, #8088aa);
+  --down: light-dark(#b91c1c, #f87171);
   --accent: light-dark(#b45309, #fbbf24);
   --accent-wash: light-dark(#b4530912, #fbbf2412);
   --accent-line: light-dark(#b4530980, #fbbf2466);
@@ -20,6 +21,7 @@
   --cell-track: var(--cell-min);
   --cell-padding: 9px 14px;
   --cell-gap: 12px;
+  --readout-inline: 14px;
   --tile-gutter: 8px;
   --icon-size: 26px;
   --gutter: clamp(16px, 2vw, 24px);
@@ -49,6 +51,7 @@
   --cell-min: clamp(150px, 17vw, 190px);
   --cell-padding: 7px 10px;
   --cell-gap: 9px;
+  --readout-inline: 10px;
   --icon-size: 20px;
 }
 
@@ -431,11 +434,10 @@ input {
   color: var(--text-3);
 }
 
-/* Equal rows keep tile tops aligned across lanes, whatever each tile holds. */
+/* Rows size to their tallest tile, so tile tops stay aligned across lanes. */
 .cells {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--cell-track), 1fr));
-  grid-auto-rows: 1fr;
   gap: var(--tile-gutter);
 }
 
@@ -494,6 +496,98 @@ input {
 .groups:not(:has(.cell:focus-visible)) .cell.top {
   background: var(--accent-wash);
   box-shadow: inset 0 0 0 1px var(--accent-line);
+}
+
+/* Only a widget tile separates this row from what sits under it. */
+.cell-main {
+  display: contents;
+}
+
+.cell-widget {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+}
+
+/* A widget makes rows taller, so names share a top line instead of centering apart. */
+.cells:has(.cell-widget) .cell:not(.cell-widget) {
+  align-items: flex-start;
+}
+
+.cells:has(.cell-widget) .cell-main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cell-gap);
+  min-width: 0;
+}
+
+/* Centers a name's first line on the icon, whether or not a description follows. */
+.cells:has(.cell-widget) .cell-text {
+  padding-top: calc((var(--icon-size) - 1.4em) / 2);
+}
+
+.cell-widget .cell-main {
+  padding: var(--cell-padding);
+}
+
+/* Dividers run to the tile's edges. */
+.readout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--border);
+}
+
+/* Counts change on every refresh, and must not change a tile's lanes. */
+.cells[data-measuring] .readout {
+  display: none;
+}
+
+.readout-cell {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 4px var(--readout-inline);
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+.readout-cell + .readout-cell {
+  border-left: 1px solid var(--border);
+}
+
+.readout-value {
+  flex: none;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.readout-quiet,
+.readout-quiet .readout-value {
+  color: var(--text-3);
+}
+
+.readout-down {
+  font-weight: 600;
+  color: var(--down);
+}
+
+.readout-down .readout-value {
+  color: var(--down);
+}
+
+.readout-off {
+  display: block;
+  padding: 4px var(--readout-inline);
+  font-size: 11px;
+  line-height: 22px;
+  color: var(--text-3);
 }
 
 .cell-text {
@@ -710,6 +804,13 @@ input {
 @media (max-width: 640px) and (pointer: coarse) {
   :root {
     --bar-height: 119px;
+  }
+}
+
+@media (max-width: 399px) {
+  :root,
+  :root[data-density='compact'] {
+    --readout-inline: 8px;
   }
 }
 
