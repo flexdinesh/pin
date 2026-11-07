@@ -377,7 +377,11 @@ An inline panel in the content column for the empty, no-match, and load-failure 
 
 ### App Icon
 
-The favicon's amber pin on the dark ground, in both themes. `apps/web/public/icons/` holds PNGs rendered from it with `rsvg-convert`: 192, 512 and 180 (Apple touch) from `src/favicon.svg`, and a 512 maskable from `src/icon-maskable.svg`, which scales the glyph to 80% to stay inside the safe zone. Change the SVG and re-render; never edit the PNGs.
+The Quad mark on the dark ground, in both themes: four square tiles, three strict in neutral `#454b63`, and the top-left one loose in bright amber, hanging off axis from its pin. The neutral belongs to the mark and is not a UI token. The loose tile is the only rotated shape in the system.
+
+There are two drawings. `src/favicon.svg` is the small-size cut at full size, with a bigger tile at 18° and no pin hole, because the hole blurs at 16px. `src/icon.svg` and `src/icon-maskable.svg` carry the full mark, with an 11-unit tile at 14° and a 3-unit pin hole, at 80% and 64% scale; 64% keeps the mark's corners inside the maskable safe zone. `apps/web/public/icons/` holds PNGs rendered with `rsvg-convert`: 192, 512 and 180 (Apple touch) from `src/icon.svg`, and a 512 maskable from `src/icon-maskable.svg`. Change the SVG and re-render; never edit the PNGs.
+
+The top bar keeps its home icon; the mark does not appear in the interface. `docs/logo-dark.svg` and `docs/logo-light.svg` are the README lockup: the mark with no ground, plus "pin" in IBM Plex Sans 600 converted to outlines, with the loose tile in Signal Amber's dark and light values.
 
 ## Do's and Don'ts
 

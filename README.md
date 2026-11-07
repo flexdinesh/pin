@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
+  <img src="docs/logo-light.svg" alt="pin" height="56">
+</picture>
+
 # pin
 
 Self-hosted bookmark dashboard driven by one YAML file. Links, labels, flat groups and optional status widgets: no accounts, no in-app editing.
