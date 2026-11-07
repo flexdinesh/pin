@@ -63,6 +63,34 @@ describe('filterGroups', () => {
     expect(names(filterGroups(groups, 'develop'))).toEqual(['Registry'])
   })
 
+  it('matches label name and keeps the label on the result', () => {
+    const labelled: Group[] = [
+      {
+        name: 'Apps',
+        bookmarks: [
+          { name: 'Gitea', url: 'https://g.test', label: { name: 'VPN', color: '#0ea5e9' } },
+          { name: 'Notes', url: 'https://n.test' },
+        ],
+      },
+    ]
+    const result = filterGroups(labelled, 'vpn')
+    expect(names(result)).toEqual(['Gitea'])
+    expect(result[0]?.bookmarks[0]?.label).toEqual({ name: 'VPN', color: '#0ea5e9' })
+  })
+
+  it('prefers a name match over a label match for the top match', () => {
+    const labelled: Group[] = [
+      {
+        name: 'Apps',
+        bookmarks: [
+          { name: 'Gitea', url: 'https://g.test', label: { name: 'vpn' } },
+          { name: 'VPN Admin', url: 'https://v.test' },
+        ],
+      },
+    ]
+    expect(topMatch(filterGroups(labelled, 'vpn'), 'vpn')?.name).toBe('VPN Admin')
+  })
+
   it('requires every term, across fields', () => {
     expect(names(filterGroups(groups, 'infra metrics'))).toEqual(['Grafana'])
     expect(names(filterGroups(groups, 'infra registry'))).toEqual([])

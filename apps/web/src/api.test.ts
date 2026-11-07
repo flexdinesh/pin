@@ -14,8 +14,10 @@ describe('parseConfig', () => {
               url: 'https://a.test',
               description: 'd',
               icon: { kind: 'mask', src: 'https://i.test/a.svg', color: '#112233' },
+              label: { name: 'vpn', color: '#0ea5e9' },
             },
-            { name: 'B', url: 'https://b.test' },
+            { name: 'B', url: 'https://b.test', label: { name: 'beta' } },
+            { name: 'C', url: 'https://c.test' },
           ],
         },
       ],
@@ -36,6 +38,18 @@ describe('parseConfig', () => {
           {
             name: 'g',
             bookmarks: [{ name: 'a', url: 'https://a.test', icon: { kind: 'x', src: 'y' } }],
+          },
+        ],
+      },
+    ],
+    [
+      'label without a name',
+      {
+        title: 'x',
+        groups: [
+          {
+            name: 'g',
+            bookmarks: [{ name: 'a', url: 'https://a.test', label: { color: '#112233' } }],
           },
         ],
       },

@@ -1,3 +1,5 @@
+import ChevronDown from 'lucide-solid/icons/chevron-down'
+import ChevronRight from 'lucide-solid/icons/chevron-right'
 import CornerDownLeft from 'lucide-solid/icons/corner-down-left'
 import House from 'lucide-solid/icons/house'
 import Search from 'lucide-solid/icons/search'
@@ -18,6 +20,7 @@ import {
 } from 'solid-js'
 import { fetchConfig, type Bookmark, type Config, type Group } from './api'
 import { BookmarkIcon } from './BookmarkIcon'
+import { createCollapse, type CollapseStore } from './collapse'
 import { filterGroups, topMatch } from './filter'
 import { createSettings, type SettingsStore } from './settings'
 import { SettingsPanel } from './SettingsPanel'
@@ -54,6 +57,23 @@ function BookmarkCell(props: {
             <span class="cell-description">{props.bookmark.description}</span>
           </Show>
         </span>
+        <Show when={props.bookmark.label}>
+          {(label) => (
+            <span class="tag" title={label().name}>
+              <span class="visually-hidden">Label: </span>
+              <Show when={label().color}>
+                {(color) => (
+                  <span
+                    class="tag-color"
+                    style={{ 'background-color': color() }}
+                    aria-hidden="true"
+                  />
+                )}
+              </Show>
+              <span class="tag-name">{label().name}</span>
+            </span>
+          )}
+        </Show>
         {/* CSS shows it on the cell Enter would open: the top match or the focused cell. */}
         <Show when={props.filtering}>
           <kbd class="enter-hint" aria-hidden="true">
@@ -65,17 +85,12 @@ function BookmarkCell(props: {
   )
 }
 
-function GroupPanel(props: {
+function GroupTiles(props: {
   group: Group
-  total: number | undefined
   top: Bookmark | undefined
   filtering: boolean
   store: SettingsStore
 }) {
-  const count = () =>
-    props.total === undefined
-      ? String(props.group.bookmarks.length)
-      : `${props.group.bookmarks.length}/${props.total}`
   const [list, setList] = createSignal<HTMLUListElement>()
   // Settings change the lanes and the text. The filter adds the Enter hint.
   createEffect(
@@ -91,25 +106,72 @@ function GroupPanel(props: {
     if (element) onCleanup(keepTilesFitted(element))
   })
   return (
-    <section class="group" aria-label={props.group.name || 'Other bookmarks'}>
+    <ul class="cells" ref={setList}>
+      <For each={props.group.bookmarks}>
+        {(bookmark) => (
+          <BookmarkCell
+            bookmark={bookmark}
+            top={bookmark === props.top}
+            filtering={props.filtering}
+            store={props.store}
+          />
+        )}
+      </For>
+    </ul>
+  )
+}
+
+function GroupPanel(props: {
+  group: Group
+  total: number | undefined
+  top: Bookmark | undefined
+  filtering: boolean
+  store: SettingsStore
+  collapse: CollapseStore
+}) {
+  const count = () =>
+    props.total === undefined
+      ? String(props.group.bookmarks.length)
+      : `${props.group.bookmarks.length}/${props.total}`
+  // The filter shows every match, so it overrides a saved collapse without changing it.
+  const collapsed = () => !props.filtering && props.collapse.isCollapsed(props.group.name)
+  return (
+    <section
+      class="group"
+      classList={{ collapsed: collapsed() }}
+      aria-label={props.group.name || 'Other bookmarks'}
+    >
       <Show when={props.group.name}>
         <header class="group-header">
-          <h2>{props.group.name}</h2>
+          <h2>
+            {/* Disabled while filtering, so Tab from the filter reaches results directly. */}
+            <button
+              type="button"
+              class="group-toggle"
+              aria-expanded={!collapsed()}
+              disabled={props.filtering}
+              onClick={() => props.collapse.toggle(props.group.name)}
+            >
+              <Show
+                when={collapsed()}
+                fallback={<ChevronDown size={14} stroke-width={1.75} aria-hidden="true" />}
+              >
+                <ChevronRight size={14} stroke-width={1.75} aria-hidden="true" />
+              </Show>
+              {props.group.name}
+            </button>
+          </h2>
           <span class="group-count">{count()}</span>
         </header>
       </Show>
-      <ul class="cells" ref={setList}>
-        <For each={props.group.bookmarks}>
-          {(bookmark) => (
-            <BookmarkCell
-              bookmark={bookmark}
-              top={bookmark === props.top}
-              filtering={props.filtering}
-              store={props.store}
-            />
-          )}
-        </For>
-      </ul>
+      <Show when={!collapsed()}>
+        <GroupTiles
+          group={props.group}
+          top={props.top}
+          filtering={props.filtering}
+          store={props.store}
+        />
+      </Show>
     </section>
   )
 }
@@ -119,6 +181,7 @@ function Dashboard(props: {
   query: string
   onClear: () => void
   store: SettingsStore
+  collapse: CollapseStore
 }) {
   const visible = createMemo(() => filterGroups(props.config.groups, props.query))
   const filtering = () => props.query.trim() !== ''
@@ -153,6 +216,7 @@ function Dashboard(props: {
               top={top()}
               filtering={filtering()}
               store={props.store}
+              collapse={props.collapse}
             />
           )}
         </For>
@@ -172,6 +236,7 @@ function startsFilter(event: KeyboardEvent, hasQuery: boolean): boolean {
 
 export function App() {
   const store = createSettings()
+  const collapse = createCollapse()
   const [config, { refetch }] = createResource(fetchConfig)
   const [query, setQuery] = createSignal('')
   const [input, setInput] = createSignal<HTMLInputElement>()
@@ -321,7 +386,13 @@ export function App() {
           </Match>
           <Match when={loaded()}>
             {(current) => (
-              <Dashboard config={current()} query={query()} onClear={clearAndFocus} store={store} />
+              <Dashboard
+                config={current()}
+                query={query()}
+                onClear={clearAndFocus}
+                store={store}
+                collapse={collapse}
+              />
             )}
           </Match>
         </Switch>

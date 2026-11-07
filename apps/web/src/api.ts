@@ -1,6 +1,14 @@
 export type Icon = { kind: 'image' | 'mask'; src: string; color?: string }
 
-export type Bookmark = { name: string; url: string; description?: string; icon?: Icon }
+export type Label = { name: string; color?: string }
+
+export type Bookmark = {
+  name: string
+  url: string
+  description?: string
+  icon?: Icon
+  label?: Label
+}
 
 export type Group = { name: string; bookmarks: Bookmark[] }
 
@@ -18,6 +26,14 @@ function parseIcon(value: unknown): Icon | undefined {
   return icon
 }
 
+function parseLabel(value: unknown): Label | undefined {
+  if (value === undefined) return undefined
+  if (!isRecord(value) || typeof value.name !== 'string') throw new Error('invalid label')
+  const label: Label = { name: value.name }
+  if (typeof value.color === 'string') label.color = value.color
+  return label
+}
+
 function parseBookmark(value: unknown): Bookmark {
   if (!isRecord(value) || typeof value.name !== 'string' || typeof value.url !== 'string') {
     throw new Error('invalid bookmark')
@@ -26,6 +42,8 @@ function parseBookmark(value: unknown): Bookmark {
   if (typeof value.description === 'string') bookmark.description = value.description
   const icon = parseIcon(value.icon)
   if (icon) bookmark.icon = icon
+  const label = parseLabel(value.label)
+  if (label) bookmark.label = label
   return bookmark
 }
 

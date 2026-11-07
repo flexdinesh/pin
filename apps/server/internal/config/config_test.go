@@ -66,6 +66,97 @@ func TestParseResolvesIcon(t *testing.T) {
 	}
 }
 
+func TestParseResolvesLabels(t *testing.T) {
+	cfg, err := Parse([]byte(`
+labels:
+  vpn: "#0ea5e9"
+  beta:   # no color
+  unused: "#112233"
+bookmarks:
+  - {name: A, url: 'https://a.test', label: vpn}
+  - {name: B, url: 'https://b.test', label: beta}
+  - {name: C, url: 'https://c.test'}
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := json.Marshal(cfg.Groups[0].Bookmarks)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `[{"name":"A","url":"https://a.test","label":{"name":"vpn","color":"#0ea5e9"}},` +
+		`{"name":"B","url":"https://b.test","label":{"name":"beta"}},` +
+		`{"name":"C","url":"https://c.test"}]`
+	if string(encoded) != want {
+		t.Errorf("bookmarks = %s, want %s", encoded, want)
+	}
+}
+
+func TestParseRejectsBadLabelReferences(t *testing.T) {
+	cases := []struct {
+		name  string
+		entry string
+		want  string
+	}{
+		{"unknown label", "{name: A, url: 'https://a.test', label: nope}", `unknown label "nope"`},
+		{"non-scalar label", "{name: A, url: 'https://a.test', label: [vpn, beta]}", "label: must be a single value"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := Parse([]byte("labels: {vpn: '#0ea5e9', beta: }\nbookmarks:\n  - " + tc.entry + "\n"))
+			if err == nil {
+				t.Fatal("want error")
+			}
+			if !strings.Contains(err.Error(), "bookmarks[0]") || !strings.Contains(err.Error(), tc.want) {
+				t.Errorf("error %q does not name the entry or contain %q", err, tc.want)
+			}
+		})
+	}
+}
+
+func TestParseRejectsInvalidLabels(t *testing.T) {
+	for name, tc := range map[string]struct{ input, want string }{
+		"not a mapping":  {"labels: [vpn]\n", "labels: must be a mapping"},
+		"bad hex":        {"labels: {vpn: '#12'}\n", `labels.vpn: color must be #rrggbb: "#12"`},
+		"named color":    {"labels: {vpn: red}\n", `labels.vpn: color must be #rrggbb: "red"`},
+		"non-scalar":     {"labels: {vpn: [a]}\n", "labels.vpn: must be a single value"},
+		"empty name":     {"labels: {'': '#112233'}\n", "name must not be empty"},
+		"duplicate":      {"labels: {vpn: '#112233', vpn: '#445566'}\n", `duplicate label "vpn"`},
+		"unquoted color": {"labels:\n  vpn: #0ea5e9\n", "labels.vpn: quote the color"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, err := Parse([]byte(tc.input))
+			if err == nil {
+				t.Fatal("want error")
+			}
+			if !strings.Contains(err.Error(), tc.want) {
+				t.Errorf("error %q does not contain %q", err, tc.want)
+			}
+		})
+	}
+}
+
+func TestParseReportsLabelAndEntryErrorsTogether(t *testing.T) {
+	_, err := Parse([]byte(`
+labels: {vpn: red}
+bookmarks:
+  - {name: A, url: 'https://a.test', label: vpn}
+  - {name: B, url: 'https://b.test', label: nope}
+`))
+	if err == nil {
+		t.Fatal("want error")
+	}
+	for _, want := range []string{"labels.vpn: color must be", `bookmarks[1]: label: unknown label "nope"`} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error %q does not contain %q", err, want)
+		}
+	}
+	// A label with a bad color is still a known label.
+	if strings.Contains(err.Error(), `unknown label "vpn"`) {
+		t.Errorf("error %q reports a defined label as unknown", err)
+	}
+}
+
 func TestParseRejectsAndNamesTheEntry(t *testing.T) {
 	cases := []struct {
 		name  string

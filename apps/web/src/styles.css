@@ -346,23 +346,83 @@ input {
   padding: var(--gutter);
 }
 
+.group.collapsed + .group.collapsed {
+  margin-top: calc(var(--tile-gutter) - 20px);
+}
+
 .group-header {
+  position: relative;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: var(--tile-gutter);
-  padding: 7px 14px;
+  /* The chevron's glyph sits inside its box, so its ink lines up with the 14px inset. */
+  padding: 7px 14px 7px 9px;
   background: var(--strip);
   border: 1px solid var(--border);
   color: var(--text-2);
 }
 
+.group.collapsed .group-header {
+  margin-bottom: 0;
+}
+
 .group-header h2 {
+  min-width: 0;
+  font-size: inherit;
+}
+
+.group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.1em;
+  text-align: start;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.group-toggle:disabled {
+  cursor: default;
+}
+
+.group-toggle:disabled .lucide {
+  color: var(--text-3);
+}
+
+/* Spreads the button over the whole bar, count included. */
+.group-toggle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transition: background-color 100ms ease-out;
+}
+
+.group-toggle:enabled:active::after {
+  background: var(--hover);
+}
+
+@media (hover: hover) {
+  .group-toggle:enabled:hover::after {
+    background: var(--hover);
+  }
+}
+
+.group-toggle:focus-visible {
+  outline: none;
+}
+
+.group-toggle:focus-visible::after {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .group-count {
@@ -452,6 +512,30 @@ input {
 .cell-description {
   font-size: 12.5px;
   color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 5px;
+  border: 1px solid var(--border-strong);
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+.tag-color {
+  flex: none;
+  width: 6px;
+  height: 6px;
+}
+
+.tag-name {
+  max-width: 16ch;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -575,6 +659,10 @@ input {
     min-height: 44px;
   }
 
+  .group-header {
+    min-height: 44px;
+  }
+
   .settings {
     top: 67px;
   }
@@ -632,7 +720,8 @@ input {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::after {
     transition: none !important;
   }
 }
