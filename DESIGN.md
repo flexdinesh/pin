@@ -361,7 +361,7 @@ The bottom of a bookmark cell whose bookmark has a widget, inside the same link.
 - **Loading:** Dashes in faint ink, hidden from assistive technology. Nothing moves.
 - **Unreachable:** One line in faint ink, "Can't reach Gatus", at the same height. The link still works, and old counts never stay on screen.
 - **Top match and focus:** The whole tile takes them as any cell does; the readout adds nothing.
-- **Layout:** Excluded when a tile is measured, so counts arriving or changing never move it to another lane. The whole tile keeps its height between refreshes. A group holding a widget aligns every tile's content to the top, so names share a line. In a narrow lane the figure holds and its label clips. Counts refresh without a live region, so a screen reader is not interrupted.
+- **Layout:** Excluded when a tile is measured, so counts arriving or changing never move it to another lane. The whole tile keeps its height between refreshes. A group holding a widget aligns every tile's content to the top, so names share a line, with each icon centered on its text. In a narrow lane the figure holds and its label clips. Counts refresh without a live region, so a screen reader is not interrupted.
 
 ### Group Header
 
