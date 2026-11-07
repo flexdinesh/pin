@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"log"
 	"net/http"
 
 	"github.com/flexdinesh/pin/apps/server/internal/config"
+	"github.com/flexdinesh/pin/apps/server/internal/widget"
 )
 
 const (
@@ -72,6 +74,7 @@ func New(cfg config.Config, assets fs.FS) (http.Handler, error) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", respond("text/html; charset=utf-8", index))
 	mux.HandleFunc("GET /api/config", respond("application/json", encoded))
+	mux.HandleFunc("GET /api/widgets/{id}", serveWidget(cfg.Widgets()))
 	mux.HandleFunc("GET /manifest.webmanifest", respond("application/manifest+json", encodedManifest))
 	mux.HandleFunc("GET /healthz", respond("text/plain; charset=utf-8", []byte("ok\n")))
 
@@ -88,6 +91,37 @@ func New(cfg config.Config, assets fs.FS) (http.Handler, error) {
 		files.ServeHTTP(w, r)
 	})
 	return mux, nil
+}
+
+// serveWidget reads only configured URLs. The browser picks a widget, never an address.
+func serveWidget(widgets []*config.Widget) http.HandlerFunc {
+	byID := make(map[string]*config.Widget, len(widgets))
+	for _, configured := range widgets {
+		byID[configured.ID] = configured
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		configured, known := byID[id]
+		if !known {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Cache-Control", cacheNever)
+		status, err := widget.Fetch(r.Context(), configured.Type, configured.URL)
+		if err != nil {
+			// The cause can name internal addresses, so it stays in the server log.
+			log.Printf("widget %s: %v", id, err)
+			http.Error(w, "widget unavailable", http.StatusBadGateway)
+			return
+		}
+		body, err := json.Marshal(status)
+		if err != nil {
+			http.Error(w, "widget unavailable", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write(body)
+	}
 }
 
 func respond(contentType string, body []byte) http.HandlerFunc {

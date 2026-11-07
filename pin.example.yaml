@@ -8,6 +8,17 @@ labels:
   beta:
 
 bookmarks:
+  # Live up and down counts, read from Gatus by the pin server. Add `url` under
+  # widget when pin reaches Gatus at another address. This host doesn't exist, so
+  # the tile says it can't reach Gatus.
+  - name: Gatus
+    url: https://status.example.com
+    group: Monitoring
+    icon: gatus
+    description: Service health
+    widget:
+      type: gatus
+
   # Named icon from dashboard-icons.
   - name: Grafana
     url: https://grafana.example.com

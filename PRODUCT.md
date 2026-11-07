@@ -16,11 +16,11 @@ One self-hoster running a homelab, plus anyone on their network. They open pin m
 
 ## Product Purpose
 
-pin shows a dashboard of labelled bookmarks in flat groups, from one YAML file. Success is reaching any link in a glance or a couple of keystrokes.
+pin shows a dashboard of labelled bookmarks in flat groups, from one YAML file, with optional live status on a bookmark's tile. Success is reaching any link in a glance or a couple of keystrokes.
 
 ## Positioning
 
-Links, labels and groups only: one file, no widgets, no status, no accounts. The server knows nothing about any viewer; each browser keeps its own layout, theme and collapsed groups.
+Links, labels, groups and status widgets on the links themselves: one file, no accounts. The server knows nothing about any viewer; each browser keeps its own layout, theme and collapsed groups.
 
 ## Operating Context
 
@@ -31,7 +31,8 @@ Links, labels and groups only: one file, no widgets, no status, no accounts. The
 
 ## Capabilities and Constraints
 
-- Bookmark fields: name, url, optional group, icon, description and label.
+- Bookmark fields: name, url, optional group, icon, description, label and widget.
+- A widget shows live data from the bookmark's app on its tile. Gatus is the first: endpoints up and down, from its public endpoint with no token. The pin server fetches it, and browsers refresh every 30 seconds while visible. A failed read says so on the tile and never blocks the link.
 - Labels are defined once at the top of the config, with an optional color. A bookmark has at most one, shown as a small tag.
 - Groups are flat and ordered by first appearance. Ungrouped links come last, with no heading.
 - A group's title bar collapses it, per browser. Groups start open, and filtering shows matches in collapsed groups.
@@ -54,7 +55,7 @@ The owner's real config of 38 links is in the k8s-cluster repo. `pin.example.yam
 ## Product Principles
 
 - Reaching a link beats looking at the dashboard.
-- Everything on screen is either a link or a way to reach one.
+- Everything on screen is either a link, a way to reach one, or status carried by the link it describes.
 - Desktop and phone are equally first-class.
 - A missing icon or a bad config never breaks the page or goes unnoticed.
 

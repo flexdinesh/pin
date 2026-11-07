@@ -2,12 +2,17 @@ export type Icon = { kind: 'image' | 'mask'; src: string; color?: string }
 
 export type Label = { name: string; color?: string }
 
+export type Widget = { id: string; type: 'gatus' }
+
+export type WidgetStatus = { up: number; down: number }
+
 export type Bookmark = {
   name: string
   url: string
   description?: string
   icon?: Icon
   label?: Label
+  widget?: Widget
 }
 
 export type Group = { name: string; bookmarks: Bookmark[] }
@@ -34,6 +39,13 @@ function parseLabel(value: unknown): Label | undefined {
   return label
 }
 
+function parseWidget(value: unknown): Widget | undefined {
+  if (value === undefined) return undefined
+  if (!isRecord(value) || typeof value.id !== 'string') throw new Error('invalid widget')
+  if (value.type !== 'gatus') throw new Error('invalid widget type')
+  return { id: value.id, type: value.type }
+}
+
 function parseBookmark(value: unknown): Bookmark {
   if (!isRecord(value) || typeof value.name !== 'string' || typeof value.url !== 'string') {
     throw new Error('invalid bookmark')
@@ -44,6 +56,8 @@ function parseBookmark(value: unknown): Bookmark {
   if (icon) bookmark.icon = icon
   const label = parseLabel(value.label)
   if (label) bookmark.label = label
+  const widget = parseWidget(value.widget)
+  if (widget) bookmark.widget = widget
   return bookmark
 }
 
@@ -68,4 +82,18 @@ export async function fetchConfig(): Promise<Config> {
   if (!response.ok) throw new Error(`config request failed: ${response.status}`)
   const body: unknown = await response.json()
   return parseConfig(body)
+}
+
+export function parseWidgetStatus(value: unknown): WidgetStatus {
+  if (!isRecord(value) || typeof value.up !== 'number' || typeof value.down !== 'number') {
+    throw new Error('invalid widget status')
+  }
+  return { up: value.up, down: value.down }
+}
+
+export async function fetchWidgetStatus(id: string, signal: AbortSignal): Promise<WidgetStatus> {
+  const response = await fetch(`/api/widgets/${encodeURIComponent(id)}`, { signal })
+  if (!response.ok) throw new Error(`widget request failed: ${response.status}`)
+  const body: unknown = await response.json()
+  return parseWidgetStatus(body)
 }

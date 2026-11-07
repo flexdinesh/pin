@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseConfig } from './api'
+import { parseConfig, parseWidgetStatus } from './api'
 
 describe('parseConfig', () => {
   it('accepts a full server response', () => {
@@ -18,6 +18,7 @@ describe('parseConfig', () => {
             },
             { name: 'B', url: 'https://b.test', label: { name: 'beta' } },
             { name: 'C', url: 'https://c.test' },
+            { name: 'D', url: 'https://d.test', widget: { id: '0', type: 'gatus' } },
           ],
         },
       ],
@@ -54,7 +55,45 @@ describe('parseConfig', () => {
         ],
       },
     ],
+    [
+      'unknown widget type',
+      {
+        title: 'x',
+        groups: [
+          {
+            name: 'g',
+            bookmarks: [{ name: 'a', url: 'https://a.test', widget: { id: '0', type: 'nope' } }],
+          },
+        ],
+      },
+    ],
+    [
+      'widget without an id',
+      {
+        title: 'x',
+        groups: [
+          {
+            name: 'g',
+            bookmarks: [{ name: 'a', url: 'https://a.test', widget: { type: 'gatus' } }],
+          },
+        ],
+      },
+    ],
   ])('rejects %s', (_label, value) => {
     expect(() => parseConfig(value)).toThrow()
+  })
+})
+
+describe('parseWidgetStatus', () => {
+  it('accepts counts', () => {
+    expect(parseWidgetStatus({ up: 12, down: 0 })).toEqual({ up: 12, down: 0 })
+  })
+
+  it.each([
+    ['null', null],
+    ['missing down', { up: 1 }],
+    ['text counts', { up: '1', down: '0' }],
+  ])('rejects %s', (_label, value) => {
+    expect(() => parseWidgetStatus(value)).toThrow()
   })
 })

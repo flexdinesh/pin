@@ -1,6 +1,6 @@
 # pin
 
-Self-hosted bookmark dashboard driven by one YAML file. Links, labels and flat groups only: no widgets, no accounts, no in-app editing.
+Self-hosted bookmark dashboard driven by one YAML file. Links, labels, flat groups and optional status widgets: no accounts, no in-app editing.
 
 ## Run
 
@@ -26,6 +26,8 @@ bookmarks:
     icon: grafana           # optional
     description: Metrics    # optional
     label: vpn              # optional, one label defined under labels
+    widget:                 # optional, see Widgets
+      type: gatus
 ```
 
 - Groups appear in order of first use. Ungrouped bookmarks come last, with no heading.
@@ -51,6 +53,26 @@ Browsers load icons directly from these sources, so named icons need internet ac
 | `https://example.com/icon.png` | That URL |
 
 Local paths like `/icons/foo.png` are not supported.
+
+### Widgets
+
+A widget adds live counts to a bookmark's tile. The tile stays one link.
+
+```yaml
+- name: Gatus
+  url: https://status.example.com
+  widget:
+    type: gatus
+    url: http://gatus.monitoring:8080  # optional, defaults to the bookmark's url
+```
+
+| Type | Shows | Source |
+| --- | --- | --- |
+| `gatus` | Endpoints up and down, by their latest result. Endpoints with no results yet are not counted. | `/api/v1/endpoints/statuses`, no token |
+
+- The pin server fetches the data, because Gatus sends no CORS headers. pin itself must be able to reach that address, which may differ from the link your browser opens. Set `widget.url` when it does. It stays on the server.
+- Browsers refresh every 30 seconds while the tab is visible.
+- A tile shows "Can't reach Gatus" when pin gets no usable answer, including from a Gatus behind authentication or using a certificate pin doesn't trust. The cause goes to pin's log.
 
 ## Use
 

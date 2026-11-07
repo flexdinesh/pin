@@ -10,11 +10,13 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"go.yaml.in/yaml/v3"
 
 	"github.com/flexdinesh/pin/apps/server/internal/icon"
+	"github.com/flexdinesh/pin/apps/server/internal/widget"
 )
 
 const defaultTitle = "pin"
@@ -44,12 +46,21 @@ type Bookmark struct {
 	Description string     `json:"description,omitempty"`
 	Icon        *icon.Icon `json:"icon,omitempty"`
 	Label       *Label     `json:"label,omitempty"`
+	Widget      *Widget    `json:"widget,omitempty"`
 }
 
 // Label marks a bookmark. An empty Color draws it in neutral ink.
 type Label struct {
 	Name  string `json:"name"`
 	Color string `json:"color,omitempty"`
+}
+
+// Widget adds live data to a bookmark's tile. URL is where this server reads it
+// from, possibly an internal address, so it never reaches the browser.
+type Widget struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+	URL  string `json:"-"`
 }
 
 // Load reads and parses the file at path.
@@ -116,7 +127,23 @@ func Parse(data []byte) (Config, error) {
 	if len(ungrouped) > 0 {
 		cfg.Groups = append(cfg.Groups, Group{Bookmarks: ungrouped})
 	}
+	for i, configured := range cfg.Widgets() {
+		configured.ID = strconv.Itoa(i)
+	}
 	return cfg, nil
+}
+
+// Widgets lists the configured widgets in display order.
+func (c Config) Widgets() []*Widget {
+	var widgets []*Widget
+	for _, group := range c.Groups {
+		for _, bookmark := range group.Bookmarks {
+			if bookmark.Widget != nil {
+				widgets = append(widgets, bookmark.Widget)
+			}
+		}
+	}
+	return widgets
 }
 
 // parseLabels keeps a label whose color is invalid, so bookmarks using it do not
@@ -184,6 +211,16 @@ func parseEntry(node *yaml.Node, labels map[string]Label) (string, Bookmark, err
 		}
 		seen[key] = true
 
+		if key == "widget" {
+			parsed, err := parseWidget(node.Content[i+1])
+			if err != nil {
+				errs = append(errs, fmt.Errorf("widget: %w", err))
+				continue
+			}
+			bookmark.Widget = parsed
+			continue
+		}
+
 		value, err := scalar(node.Content[i+1])
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s: %w", key, err))
@@ -222,6 +259,9 @@ func parseEntry(node *yaml.Node, labels map[string]Label) (string, Bookmark, err
 		errs = append(errs, err)
 	}
 	bookmark.URL = rawURL
+	if bookmark.Widget != nil && bookmark.Widget.URL == "" {
+		bookmark.Widget.URL = rawURL
+	}
 	if rawIcon != "" {
 		parsed, err := icon.Parse(rawIcon)
 		if err != nil {
@@ -233,6 +273,64 @@ func parseEntry(node *yaml.Node, labels map[string]Label) (string, Bookmark, err
 		return "", Bookmark{}, err
 	}
 	return group, bookmark, nil
+}
+
+// parseWidget leaves URL empty when unset, so the bookmark's url applies.
+func parseWidget(node *yaml.Node) (*Widget, error) {
+	node = resolve(node)
+	if node.Tag == "!!null" {
+		return nil, nil
+	}
+	if node.Kind != yaml.MappingNode {
+		return nil, errors.New("must be a mapping")
+	}
+
+	var (
+		errs   []error
+		parsed Widget
+		seen   = map[string]bool{}
+	)
+	for i := 0; i+1 < len(node.Content); i += 2 {
+		key := node.Content[i].Value
+		if seen[key] {
+			errs = append(errs, fmt.Errorf("duplicate key %q", key))
+			continue
+		}
+		seen[key] = true
+
+		value, err := scalar(node.Content[i+1])
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s: %w", key, err))
+			continue
+		}
+		switch key {
+		case "type":
+			parsed.Type = value
+		case "url":
+			if value == "" {
+				continue
+			}
+			if err := validateURL(value); err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			parsed.URL = value
+		default:
+			errs = append(errs, fmt.Errorf("unknown key %q", key))
+		}
+	}
+
+	switch parsed.Type {
+	case "":
+		errs = append(errs, errors.New("type is required"))
+	case widget.TypeGatus:
+	default:
+		errs = append(errs, fmt.Errorf("unknown type %q", parsed.Type))
+	}
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
+	}
+	return &parsed, nil
 }
 
 func resolve(node *yaml.Node) *yaml.Node {
