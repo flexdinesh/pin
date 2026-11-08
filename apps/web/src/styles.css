@@ -666,6 +666,11 @@ input {
   filter: drop-shadow(0 0 1px var(--icon-halo)) drop-shadow(0 0 1px var(--icon-halo-2));
 }
 
+/* An opaque tile has a square edge, so the halo would frame it. */
+.icon img.no-halo {
+  filter: none;
+}
+
 .mask {
   display: block;
   width: 100%;

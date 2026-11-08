@@ -286,7 +286,7 @@ Flat. Depth comes from tonal steps (ground, panel, strip) and hairlines. The sti
 
 - **Selected ring** (`box-shadow: inset 0 0 0 1px var(--accent)`): A selected segment.
 - **Top match ring** (`box-shadow: inset 0 0 0 1px var(--accent-line)`): The cell Enter will open.
-- **Logo halo** (`filter: drop-shadow(0 0 1px var(--icon-halo)) drop-shadow(0 0 1px var(--icon-halo-2))`): Image logos only. A legibility aid for third-party artwork, and the only blur in the system.
+- **Logo halo** (`filter: drop-shadow(0 0 1px var(--icon-halo)) drop-shadow(0 0 1px var(--icon-halo-2))`): Image logos only. A legibility aid for third-party artwork, and the only blur in the system. Bookmarks set `halo: false` for logos that are opaque tiles, where it would trace a frame.
 
 ### Named Rules
 

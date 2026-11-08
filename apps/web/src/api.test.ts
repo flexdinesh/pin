@@ -17,7 +17,12 @@ describe('parseConfig', () => {
               label: { name: 'vpn', color: '#0ea5e9' },
             },
             { name: 'B', url: 'https://b.test', label: { name: 'beta' } },
-            { name: 'C', url: 'https://c.test' },
+            {
+              name: 'C',
+              url: 'https://c.test',
+              icon: { kind: 'image', src: 'https://i.test/c.svg' },
+              noHalo: true,
+            },
             { name: 'D', url: 'https://d.test', widget: { id: '0', type: 'gatus' } },
           ],
         },

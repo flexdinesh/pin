@@ -45,8 +45,11 @@ type Bookmark struct {
 	URL         string     `json:"url"`
 	Description string     `json:"description,omitempty"`
 	Icon        *icon.Icon `json:"icon,omitempty"`
-	Label       *Label     `json:"label,omitempty"`
-	Widget      *Widget    `json:"widget,omitempty"`
+	// NoHalo drops the legibility halo from an image icon that is an opaque
+	// tile, where the halo traces the tile's edge as a frame.
+	NoHalo bool    `json:"noHalo,omitempty"`
+	Label  *Label  `json:"label,omitempty"`
+	Widget *Widget `json:"widget,omitempty"`
 }
 
 // Label marks a bookmark. An empty Color draws it in neutral ink.
@@ -200,6 +203,7 @@ func parseEntry(node *yaml.Node, labels map[string]Label) (string, Bookmark, err
 		errs          []error
 		group, rawURL string
 		rawIcon       string
+		haloSet       bool
 		bookmark      Bookmark
 		seen          = map[string]bool{}
 	)
@@ -218,6 +222,15 @@ func parseEntry(node *yaml.Node, labels map[string]Label) (string, Bookmark, err
 				continue
 			}
 			bookmark.Widget = parsed
+			continue
+		}
+		if key == "halo" {
+			parsed, err := boolean(node.Content[i+1])
+			if err != nil {
+				errs = append(errs, fmt.Errorf("halo: %w", err))
+				continue
+			}
+			bookmark.NoHalo, haloSet = !parsed, true
 			continue
 		}
 
@@ -268,6 +281,9 @@ func parseEntry(node *yaml.Node, labels map[string]Label) (string, Bookmark, err
 			errs = append(errs, fmt.Errorf("icon: %w", err))
 		}
 		bookmark.Icon = &parsed
+	}
+	if haloSet && (bookmark.Icon == nil || bookmark.Icon.Kind != icon.KindImage) {
+		errs = append(errs, errors.New("halo: applies only to image icons"))
 	}
 	if err := errors.Join(errs...); err != nil {
 		return "", Bookmark{}, err
@@ -349,6 +365,14 @@ func scalar(node *yaml.Node) (string, error) {
 		return "", nil
 	}
 	return strings.TrimSpace(node.Value), nil
+}
+
+func boolean(node *yaml.Node) (bool, error) {
+	node = resolve(node)
+	if node.Kind != yaml.ScalarNode || node.Tag != "!!bool" {
+		return false, errors.New("must be true or false")
+	}
+	return strconv.ParseBool(node.Value)
 }
 
 func validateURL(raw string) error {

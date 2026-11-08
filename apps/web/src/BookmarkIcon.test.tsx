@@ -19,6 +19,17 @@ describe('BookmarkIcon', () => {
     expect(container.querySelector('.monogram')).toBeNull()
   })
 
+  it('drops the halo only from an image icon that opts out', () => {
+    const { container } = render(() => (
+      <>
+        <BookmarkIcon name="A" icon={{ kind: 'image', src: 'https://i.test/a.svg' }} />
+        <BookmarkIcon name="B" icon={{ kind: 'image', src: 'https://i.test/b.svg' }} noHalo />
+      </>
+    ))
+    const images = [...container.querySelectorAll('img')]
+    expect(images.map((image) => image.classList.contains('no-halo'))).toEqual([false, true])
+  })
+
   it('falls back to a monogram when an image fails', () => {
     const { container } = render(() => (
       <BookmarkIcon name="grafana" icon={{ kind: 'image', src: 'https://i.test/g.png' }} />
