@@ -11,6 +11,7 @@ export type Bookmark = {
   url: string
   description?: string
   icon?: Icon
+  noHalo?: boolean
   label?: Label
   widget?: Widget
 }
@@ -54,6 +55,7 @@ function parseBookmark(value: unknown): Bookmark {
   if (typeof value.description === 'string') bookmark.description = value.description
   const icon = parseIcon(value.icon)
   if (icon) bookmark.icon = icon
+  if (value.noHalo === true) bookmark.noHalo = true
   const label = parseLabel(value.label)
   if (label) bookmark.label = label
   const widget = parseWidget(value.widget)

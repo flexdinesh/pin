@@ -5,7 +5,7 @@ function monogram(name: string): string {
   return (/[\p{L}\p{N}]/u.exec(name)?.[0] ?? '?').toUpperCase()
 }
 
-export function BookmarkIcon(props: { name: string; icon?: Icon }) {
+export function BookmarkIcon(props: { name: string; icon?: Icon; noHalo?: boolean }) {
   const [failed, setFailed] = createSignal(false)
   const onFail = () => setFailed(true)
 
@@ -31,7 +31,13 @@ export function BookmarkIcon(props: { name: string; icon?: Icon }) {
     <span class="icon" aria-hidden="true">
       <Switch fallback={<span class="monogram">{monogram(props.name)}</span>}>
         <Match when={!failed() && props.icon?.kind === 'image'}>
-          <img src={props.icon?.src} alt="" decoding="async" onError={onFail} />
+          <img
+            src={props.icon?.src}
+            alt=""
+            decoding="async"
+            classList={{ 'no-halo': props.noHalo === true }}
+            onError={onFail}
+          />
         </Match>
         <Match when={!failed() && props.icon?.kind === 'mask'}>
           <span class="mask" style={maskStyle()} />

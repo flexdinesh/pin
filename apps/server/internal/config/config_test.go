@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -63,6 +64,20 @@ func TestParseResolvesIcon(t *testing.T) {
 	got := cfg.Groups[0].Bookmarks[0]
 	if got.Icon == nil || got.Icon.Color != "#112233" || got.Description != "Feed" {
 		t.Errorf("bookmark = %+v, icon = %+v", got, got.Icon)
+	}
+}
+
+func TestParseHalo(t *testing.T) {
+	cfg, err := Parse([]byte("bookmarks:\n  - {name: A, url: 'https://a.test', icon: 'https://i.test/a.svg', halo: false}\n  - {name: B, url: 'https://b.test', icon: 'https://i.test/b.svg', halo: true}\n  - {name: C, url: 'https://c.test', icon: grafana}\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []bool
+	for _, bookmark := range cfg.Groups[0].Bookmarks {
+		got = append(got, bookmark.NoHalo)
+	}
+	if want := []bool{true, false, false}; !slices.Equal(got, want) {
+		t.Errorf("NoHalo = %v, want %v", got, want)
 	}
 }
 
@@ -172,6 +187,9 @@ func TestParseRejectsAndNamesTheEntry(t *testing.T) {
 		{"widget key", "{name: A, url: 'https://a.test', widget: {type: x}}", "widget"},
 		{"local icon", "{name: A, url: 'https://a.test', icon: /icons/a.png}", "local icon paths"},
 		{"bad icon", "{name: A, url: 'https://a.test', icon: 'a b'}", "invalid icon name"},
+		{"halo not a boolean", "{name: A, url: 'https://a.test', icon: grafana, halo: 'off'}", "halo: must be true or false"},
+		{"halo without icon", "{name: A, url: 'https://a.test', halo: false}", "halo: applies only to image icons"},
+		{"halo on mask icon", "{name: A, url: 'https://a.test', icon: mdi-rss, halo: false}", "halo: applies only to image icons"},
 		{"duplicate key", "{name: A, name: B, url: 'https://a.test'}", "duplicate"},
 		{"not a mapping", "just-a-string", "must be a mapping"},
 	}

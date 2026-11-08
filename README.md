@@ -29,6 +29,7 @@ bookmarks:
     url: https://grafana.example.com  # required, http or https
     group: Infrastructure   # optional
     icon: grafana           # optional
+    halo: false             # optional, default true, image icons only
     description: Metrics    # optional
     label: vpn              # optional, one label defined under labels
     widget:                 # optional, see Widgets
@@ -58,6 +59,8 @@ Browsers load icons directly from these sources, so named icons need internet ac
 | `https://example.com/icon.png` | That URL |
 
 Local paths like `/icons/foo.png` are not supported.
+
+Image icons get a faint halo so dark logos stay visible on dark panels and light logos on light ones. An icon that is an opaque tile has a square edge, so the halo draws a frame around it. Set `halo: false` on that bookmark to drop it.
 
 ### Widgets
 

@@ -94,7 +94,11 @@ function BookmarkCell(props: {
         data-top-match={props.top ? '' : undefined}
       >
         <span class="cell-main">
-          <BookmarkIcon name={props.bookmark.name} icon={props.bookmark.icon} />
+          <BookmarkIcon
+            name={props.bookmark.name}
+            icon={props.bookmark.icon}
+            noHalo={props.bookmark.noHalo}
+          />
           <span class="cell-text">
             <span class="cell-name">{props.bookmark.name}</span>
             <Show when={settings().showDescriptions && props.bookmark.description}>

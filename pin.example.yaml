@@ -63,11 +63,13 @@ bookmarks:
     icon: sh-home-assistant.svg
     description: Home automation
 
-  # Direct icon URL.
+  # Direct icon URL. halo: false drops the outline from a logo that is an opaque
+  # tile, where it would draw a frame.
   - name: Wiki
     url: https://wiki.example.com
     group: Home
     icon: https://wiki.example.com/favicon.svg
+    halo: false
 
   # Without group or icon: listed last, shown with a monogram.
   - name: Router
