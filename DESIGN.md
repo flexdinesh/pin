@@ -17,55 +17,56 @@ colors:
   accent-line: "light-dark(#b4530980, #fbbf2466)"
   icon-halo: "light-dark(#0b0d1459, #e4e8f7cc)"
   icon-halo-2: "light-dark(transparent, #e4e8f799)"
+# Desktop defaults; mobile overrides and browser-default px equivalents are in Typography.
 typography:
   title:
     fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
-    fontSize: "14px"
+    fontSize: "0.875rem"
     fontWeight: 600
     lineHeight: 1.4
   body:
     fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
-    fontSize: "14px"
+    fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.4
   name:
     fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
-    fontSize: "14px"
+    fontSize: "0.875rem"
     fontWeight: 500
     lineHeight: 1.4
   description:
     fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
-    fontSize: "12.5px"
+    fontSize: "0.78125rem"
     fontWeight: 400
     lineHeight: 1.4
   control:
     fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
-    fontSize: "12px"
+    fontSize: "0.75rem"
     fontWeight: 400
     lineHeight: 1.4
   label:
     fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
-    fontSize: "11px"
+    fontSize: "0.6875rem"
     fontWeight: 600
     lineHeight: 1.4
     letterSpacing: "0.1em"
   legend:
     fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
-    fontSize: "10.5px"
+    fontSize: "0.65625rem"
     fontWeight: 400
     lineHeight: 1.4
     letterSpacing: "0.1em"
   count:
     fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
-    fontSize: "11px"
+    fontSize: "0.6875rem"
     fontWeight: 400
     lineHeight: 1.4
     fontFeature: "'tnum'"
   figure:
     fontFamily: "'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
-    fontSize: "18px"
+    fontSize: "1.125rem"
     fontWeight: 600
-    lineHeight: "22px"
+    lineHeight: "1.375rem"
     fontFeature: "'tnum'"
 rounded:
   none: "0px"
@@ -81,24 +82,25 @@ spacing:
   cell-gap-compact: "9px"
   cell-min: "clamp(160px, 22vw, 244px)"
   cell-min-compact: "clamp(150px, 17vw, 190px)"
+# Desktop defaults unless a shared CSS dimension is referenced; mobile behavior is below.
 components:
   bar:
     backgroundColor: "{colors.bg}"
     textColor: "{colors.text}"
     typography: "{typography.title}"
-    padding: "10px clamp(16px, 2vw, 24px)"
+    padding: "calc(10px + env(safe-area-inset-top)) var(--gutter-end) 10px var(--gutter-start)"
   filter:
     backgroundColor: "{colors.panel}"
     textColor: "{colors.text}"
     typography: "{typography.body}"
     rounded: "{rounded.none}"
-    height: "34px"
+    height: "var(--filter-height)"
     padding: "0 2px 0 10px"
   icon-button:
     backgroundColor: "transparent"
     textColor: "{colors.text-2}"
     rounded: "{rounded.none}"
-    size: "34px"
+    size: "var(--bar-control-height)"
   icon-button-hover:
     backgroundColor: "{colors.hover}"
     textColor: "{colors.text}"
@@ -112,11 +114,11 @@ components:
   button-hover:
     backgroundColor: "{colors.hover}"
   segment:
-    backgroundColor: "transparent"
+    backgroundColor: "{colors.panel}"
     textColor: "{colors.text-2}"
     typography: "{typography.control}"
     rounded: "{rounded.none}"
-    height: "30px"
+    height: "auto"
   segment-hover:
     backgroundColor: "{colors.hover}"
   segment-selected:
@@ -238,15 +240,28 @@ Cool neutrals tinted slightly toward blue, plus one amber that is darker and bur
 
 ### Hierarchy
 
-- **Title** (600, 14px, 1.4): The config title in the bar and the first line of a notice. The system has no display or headline size.
-- **Body** (400, 14px, 1.4): The root size. Filter text, notice copy, and button labels.
-- **Name** (500, 14px, 1.4): Link names. Long names wrap instead of truncating.
-- **Description** (400, 12.5px, 1.4): The short phrase under a link name. One line with an ellipsis, or up to two lines on phones.
-- **Control** (400, 12px, 1.4): Segment labels, stepping to 600 when selected.
-- **Label** (600, 11px, 0.1em, uppercase): Group names in title bars.
-- **Legend** (400, 10.5px, 0.1em, uppercase): The name of a settings group.
-- **Count** (400, 11px, tabular numerals): Group counts, the filter's match count, label tags, which keep the name as written, and readout labels.
-- **Figure** (600, 18px, 22px line, tabular numerals): A widget's live counts, and nothing else. It sets the system's one step above Title.
+The root stays at `100%` to honor browser text settings; the Body role is applied on `body`. All role sizes use rem. Desktop sizes remain unchanged at the browser default of 16px. The mobile scale applies at `max-width: 640px` **or** `pointer: coarse`, including touch devices in landscape. The px equivalents below assume that browser default; they grow with the user's text setting.
+
+| Role | CSS token | Desktop rem (px) | Mobile rem (px) |
+| --- | --- | --- | --- |
+| Title | `--font-title` | 0.875rem (14px) | 1.0625rem (17px) |
+| Body / Name | `--font-body` | 0.875rem (14px) | 1.0625rem (17px) |
+| Description | `--font-description` | 0.78125rem (12.5px) | 0.9375rem (15px) |
+| Control | `--font-control` | 0.75rem (12px) | 1rem (16px) |
+| Label | `--font-label` | 0.6875rem (11px) | 0.8125rem (13px) |
+| Legend | `--font-legend` | 0.65625rem (10.5px) | 0.8125rem (13px) |
+| Count / Tag | `--font-count` | 0.6875rem (11px) | 0.8125rem (13px) |
+| Figure | `--font-figure` | 1.125rem (18px) | 1.25rem (20px) |
+
+- **Title** (600, 1.4): The config title in the bar and the first line of a notice. The system has no display or headline size.
+- **Body** (400, 1.4): Filter text, notice copy, and button labels. The filter inherits the primary Body size, including 17px on mobile.
+- **Name** (500, 1.4): Link names. Long names wrap instead of truncating.
+- **Description** (400, 1.4): The short phrase under a link name. One line with an ellipsis, or up to two lines at 640px and below.
+- **Control** (400, 1.4): Segment labels, stepping to 600 when selected. Labels can wrap as text grows.
+- **Label** (600, 0.1em, uppercase): Group names in title bars.
+- **Legend** (400, 0.1em, uppercase): The name of a settings group.
+- **Count** (400, tabular numerals): Group counts, the filter's match count, label tags, which keep the name as written, and readout labels.
+- **Figure** (600, tabular numerals): A widget's live counts, and nothing else. Its line height is `--readout-line-height`: 1.375rem (22px) on desktop and 1.625rem (26px) on mobile. It sets the system's one step above Title.
 
 ### Named Rules
 
@@ -262,13 +277,15 @@ A single full-width column of groups in config order, with a gutter of 16px to 2
 
 The sticky bar is a three-track grid: title at left, filter in the middle at up to 420px, settings control at far right. At 640px and below, the filter drops to its own full-width row under the title and settings control. The settings control comes before the filter in the DOM and is placed by the grid, so Tab from the filter reaches the results directly. The document's top scroll padding follows the bar's height, so a focused link never sits under it.
 
+The shared bar height derives from the control and filter dimensions: their maximum plus 21px and the top safe-area inset in one row; their sum plus 29px and the top inset in two rows. The settings popover uses that same height for its top offset and available height. The viewport uses `viewport-fit=cover`. Header and content side gutters take the larger of the normal gutter and each side's safe-area inset; the header adds the top inset, and content bottom padding takes the larger of its gutter and the bottom inset. The phone bottom sheet adds bottom and side safe-area padding and leaves at least 16px or the top inset above its maximum height.
+
 Tiles use an auto-filling grid of lanes with a minimum track that responds to the viewport (160px to 244px, or 150px to 190px at compact density), 8px apart. A chosen column count caps the lanes at that number, and they narrow to 150px before a lane drops. Each row takes the height of its tallest tile, which its neighbors stretch to match, so tile tops line up across lanes. Phones target two lanes; below 360px the minimum track falls to 130px to hold them.
 
-A tile whose content does not fit one lane takes two. The content is measured because it depends on rendered text, and grid placement does the rest, so tiles keep config order. A two-lane tile that does not fit at a row's end moves to the next row and leaves its lane open, as do empty lanes in the last row. There is no filler.
+A tile whose content does not fit one lane takes two. The content is measured because it depends on rendered text, and grid placement does the rest, so tiles keep config order. Larger text naturally produces more two-lane tiles and taller cells. A two-lane tile that does not fit at a row's end moves to the next row and leaves its lane open, as do empty lanes in the last row. There is no filler.
 
-Density is one switch, not many: compact tightens the cell padding, gap, minimum track, and icon together. Spacing otherwise steps through 8px inside controls and between tiles, 12px between cell contents, 20px between groups, and 14px as the inline inset of title bars.
+Density is one switch, not many: compact tightens the cell padding, gap, minimum track, and icon together. It never reduces role font sizes. Spacing otherwise steps through 8px inside controls and between tiles, 12px between cell contents, 20px between groups, and 14px as the inline inset of title bars.
 
-On a coarse pointer every control reaches at least 44px and the filter grows to 46px with 16px text. Cells hold a 44px minimum height at every density and on every pointer. A cell's hover fill applies only where the device can hover; touch gets the same fill while pressed.
+At 640px and below or on a coarse pointer, controls reach at least 44px and the filter grows to 2.875rem (46px), with primary Body text. Navigation glyphs grow from 1.0625rem (17px) to 1.375rem (22px); search and clear glyphs grow from 1rem (16px) to 1.25rem (20px). The settings button uses 2.125rem (34px) on desktop and 2.75rem (44px) on mobile. Cells hold a 44px minimum height at every density and on every pointer. A cell's hover fill applies only where the device can hover; touch gets the same fill while pressed.
 
 ### Named Rules
 
@@ -309,15 +326,16 @@ Motion across all of these is limited to a 100ms ease-out change of color or bac
 Plain, with no filled variant.
 
 - **Shape:** Square (0px).
-- **Text button:** Transparent with a firm hairline outline, ink label, 34px tall with 12px inline padding. Used only for notice recovery actions such as retry and clear filter.
-- **Icon button:** Transparent 34px square with no outline, holding a 17px icon in soft ink. Its glyph lines up with the content edge, matching the home icon opposite.
+- **Text button:** Transparent with a firm hairline outline, ink label, 34px minimum height on desktop and 44px on mobile, with 12px inline padding. Used only for notice recovery actions such as retry and clear filter.
+- **Icon button:** Transparent with no outline, holding a navigation glyph in soft ink. Button and glyph dimensions follow the desktop and mobile sizes in Layout. Its glyph lines up with the content edge, matching the home icon opposite, with its target kept inside the viewport.
 - **Hover / Focus:** Hover adds the hover tint, and an icon button's icon steps up to ink.
 
 ### Chips
 
 Settings choices are segmented radio rows rather than free chips.
 
-- **Style:** Equal-width segments joined inside one firm outline, split by firm hairlines. 30px tall, with an optional 14px icon.
+- **Style:** Equal-width segments on panel fill inside one firm outline, split by 1px firm hairline gaps. Minimum height 30px on desktop and 44px on mobile, with an optional 14px icon. Labels can wrap for larger text, increasing the row height.
+- **Columns:** Only the seven column radio choices wrap into multiple rows. Below 314px of available fieldset content width (`max-width: 313px`), they form four choices then three, with equal widths filling each row and a 44px minimum choice width. Wrapping preserves their radio behavior.
 - **State:** Selected takes the amber wash, a 1px amber inset ring, ink text, and weight 600. Hover takes the hover tint.
 
 ### Cards / Containers
@@ -331,7 +349,7 @@ Settings choices are segmented radio rows rather than free chips.
 
 ### Inputs / Fields
 
-- **Style:** Panel fill with a firm hairline, 34px tall, holding a 16px search icon, the input, and once there is a query, a count and a clear control.
+- **Style:** Panel fill with a firm hairline, 2.125rem (34px) tall on desktop and 2.875rem (46px) on mobile, holding a search icon, the input in the Body role, and once there is a query, a count and a clear control. Mobile search glyphs are 1.25rem (20px), and the clear target is 44px square.
 - **Focus:** The whole field's border turns amber and the caret is amber. This replaces the ring on the input.
 - **Placeholder:** Faint ink at full opacity.
 - **Clear control:** Out of the Tab order, because Escape does the same. Clicking it clears and returns focus to the field.
@@ -339,8 +357,8 @@ Settings choices are segmented radio rows rather than free chips.
 
 ### Navigation
 
-- **Top bar:** Opaque ground with a bottom hairline, sticky. Left side reads as a short path: a 17px home icon, a faint slash, then the config title in title weight, truncating with an ellipsis when space runs out.
-- **Settings panel:** A popover anchored under the bar at the right gutter, 348px wide, on panel fill with a firm hairline. At 640px and below it becomes a full-width bottom sheet with only a top border.
+- **Top bar:** Opaque ground with a bottom hairline, sticky. Left side reads as a short path: a home icon in the navigation glyph size, a faint slash, then the config title in title weight, truncating with an ellipsis when space runs out.
+- **Settings panel:** A popover anchored under the shared bar height at the safe-area-aware right gutter, 348px wide, on panel fill with a firm hairline. At 640px and below it becomes a full-width bottom sheet with only a top border, bottom and side safe-area padding, and a viewport-constrained scrollable height.
 
 ### Bookmark Cell
 
@@ -350,7 +368,7 @@ The signature element. A whole-tile link at a 44px minimum height, with a hairli
 - **Focus:** The amber ring sits inside the tile (offset -2px).
 - **Top match:** While filtering, the cell Enter will open takes the amber wash, the softer amber ring, and a small outlined Enter hint at its far end. Coarse pointers hide the hint. Once a result has keyboard focus, Enter opens that result, so the wash and hint move to it and the top match returns to rest.
 - **Icon:** Multicolor logos and single-color masks share a contained box. When a source is missing or fails, a monogram stands in: the name's first letter or digit in weight 600 at half the icon size, in soft ink, in a bordered square.
-- **Label tag:** At the tile's far end, before any Enter hint, at rest and in results: the label's name in the Count role and soft ink, in a firm hairline outline, truncating past 16ch. A configured color adds a 6px square before the name. Its width counts when a tile is measured, so a tag can take a tile to a second lane.
+- **Label tag:** At the tile's far end, before any Enter hint, at rest and in results: the label's name in the Count role and soft ink, in a firm hairline outline, truncating past 16ch. On phones and coarse pointers, the tag occupies at most 45% of its row so enlarged labels leave room for the bookmark name and cannot push the tile outside the viewport. A configured color adds a 6px square before the name. Its width counts when a tile is measured, so a tag can take a tile to a second lane.
 
 ### Widget Readout
 
@@ -367,7 +385,7 @@ The bottom of a bookmark cell whose bookmark has a widget, inside the same link.
 
 A full-width strip-toned title bar with a hairline outline: a 14px chevron and the group name at left, a count at far right. It sits 8px above its tiles and contains nothing else. While filtering, the count reads as shown over total.
 
-- **Fold:** The whole bar is one button, reaching 44px on coarse pointers. Hover and pressed add the hover tint, and focus draws the amber ring inside the bar. Folding removes the tiles at once, the chevron swaps without animating, and consecutive folded bars sit 8px apart. State is saved per browser.
+- **Fold:** The whole bar is one button, reaching 44px at 640px and below or on coarse pointers. Hover and pressed add the hover tint, and focus draws the amber ring inside the bar. Folding removes the tiles at once, the chevron swaps without animating, and consecutive folded bars sit 8px apart. State is saved per browser.
 - **While filtering:** Matching groups show open whatever their saved state, and the bar is disabled with a faint chevron, so Tab from the filter reaches results directly.
 - **Ungrouped links:** No bar, so they never fold.
 
@@ -393,7 +411,8 @@ The top bar keeps its home icon; the mark does not appear in the interface. `doc
 - **Do** reserve amber for focus, the top match, and selected settings.
 - **Do** use Lucide icons at stroke 1.75 with square caps and miter joins.
 - **Do** give a monogram fallback to anything that loads an external icon.
-- **Do** keep every control at 44px or more on coarse pointers.
+- **Do** keep every control at 44px or more at 640px and below or on coarse pointers.
+- **Do** preserve browser text settings with a 100% root and rem role sizes; compact density changes spacing and icons, never fonts.
 - **Do** match the existing 100ms ease-out for color and background transitions, and honor reduced motion.
 - **Do** put a widget's status inside the tile it describes, so it stays part of the link.
 

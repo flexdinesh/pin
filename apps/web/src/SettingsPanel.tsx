@@ -21,12 +21,13 @@ function Choice<T>(props: {
   icon?: (option: T) => JSX.Element
   value: T
   onChange: (option: T) => void
+  wrap?: boolean
 }) {
   const name = () => `setting-${props.legend.toLowerCase().replaceAll(' ', '-')}`
   return (
     <fieldset class="choice">
       <legend>{props.legend}</legend>
-      <div class="segments">
+      <div class="segments" classList={{ 'segments-wrap': props.wrap }}>
         <For each={props.options}>
           {(option) => (
             <label class="segment">
@@ -73,6 +74,7 @@ export function SettingsPanel(props: { store: SettingsStore; id: string }) {
       />
       <Choice
         legend="Columns"
+        wrap
         options={columnChoices}
         label={columnsLabel}
         value={current().columns}
