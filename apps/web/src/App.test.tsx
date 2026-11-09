@@ -190,6 +190,44 @@ describe('keyboard path through results', () => {
     expect(focused()?.textContent).toContain('Registry')
   })
 
+  // fireEvent has no default focus movement, like Safari and Firefox on macOS skipping links.
+  it('moves through results itself where the browser skips links on Tab', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('r')
+    expect(fireEvent.keyDown(filterInput(), { key: 'Tab' })).toBe(false)
+    expect(focused()).toBe(grafanaLink())
+    fireEvent.keyDown(grafanaLink(), { key: 'Tab' })
+    expect(focused()?.textContent).toContain('Longhorn')
+    fireEvent.keyDown(focused() ?? document.body, { key: 'Tab', shiftKey: true })
+    expect(focused()).toBe(grafanaLink())
+    fireEvent.keyDown(grafanaLink(), { key: 'Tab', shiftKey: true })
+    expect(focused()).toBe(filterInput())
+  })
+
+  it('leaves Tab to the browser past either end of the results', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('r')
+    expect(fireEvent.keyDown(filterInput(), { key: 'Tab', shiftKey: true })).toBe(true)
+    const last = screen.getByRole('link', { name: /Registry/ })
+    last.focus()
+    expect(fireEvent.keyDown(last, { key: 'Tab' })).toBe(true)
+    expect(focused()).toBe(last)
+  })
+
+  it('leaves Tab to the browser when not filtering', async () => {
+    await renderLoaded()
+    filterInput().focus()
+    expect(fireEvent.keyDown(filterInput(), { key: 'Tab' })).toBe(true)
+    expect(focused()).toBe(filterInput())
+  })
+
+  it('moves to the recovery action itself when nothing matches', async () => {
+    await renderLoaded()
+    await userEvent.keyboard('zzz')
+    fireEvent.keyDown(filterInput(), { key: 'Tab' })
+    expect(focused()).toBe(screen.getByText('Clear filter'))
+  })
+
   it('keeps Settings in the Tab order, before the filter', async () => {
     await renderLoaded()
     await userEvent.keyboard('r')
