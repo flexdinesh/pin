@@ -298,6 +298,7 @@ export function App() {
   const [config, { refetch }] = createResource(fetchConfig)
   const [query, setQuery] = createSignal('')
   const [input, setInput] = createSignal<HTMLInputElement>()
+  const [results, setResults] = createSignal<HTMLElement>()
 
   const clear = () => setQuery('')
   // Clearing can remove the focused element, so focus has to go somewhere deliberate.
@@ -331,8 +332,27 @@ export function App() {
     if (title) document.title = title
   })
 
+  // Safari, and Firefox on macOS, leave links out of the Tab order by default, so while
+  // filtering, Tab and Shift+Tab move through the filter and results here instead.
+  const moveThroughResults = (event: KeyboardEvent) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || query().trim() === '') return
+    const field = input()
+    const main = results()
+    if (!field || !main) return
+    const stops = [field, ...main.querySelectorAll<HTMLElement>('a[href], button:not(:disabled)')]
+    const index = stops.findIndex((stop) => stop === document.activeElement)
+    if (index === -1) return
+    // Past either end, the browser's own order takes over.
+    const next = stops[index + (event.shiftKey ? -1 : 1)]
+    if (!next) return
+    event.preventDefault()
+    next.focus()
+  }
+
   const onDocumentKeyDown = (event: KeyboardEvent) => {
-    if (startsFilter(event, query() !== '')) {
+    if (event.key === 'Tab') {
+      moveThroughResults(event)
+    } else if (startsFilter(event, query() !== '')) {
       // Focus restores a selection left by tabbing through the field, and a keystroke
       // from elsewhere must extend the query rather than replace it.
       const field = input()
@@ -438,7 +458,7 @@ export function App() {
         </div>
       </header>
       <SettingsPanel store={store} id={settingsPanelId} />
-      <main class="groups" onClick={onResultsClick}>
+      <main class="groups" ref={setResults} onClick={onResultsClick}>
         <Switch>
           <Match when={config.error !== undefined}>
             <div class="notice" role="alert">
