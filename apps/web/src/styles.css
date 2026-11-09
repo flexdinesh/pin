@@ -25,13 +25,29 @@
   --tile-gutter: 8px;
   --icon-size: 26px;
   --gutter: clamp(16px, 2vw, 24px);
-  --bar-height: 55px;
+  --gutter-start: max(var(--gutter), env(safe-area-inset-left));
+  --gutter-end: max(var(--gutter), env(safe-area-inset-right));
+  --font-title: 0.875rem;
+  --font-body: 0.875rem;
+  --font-description: 0.78125rem;
+  --font-control: 0.75rem;
+  --font-label: 0.6875rem;
+  --font-legend: 0.65625rem;
+  --font-count: 0.6875rem;
+  --font-figure: 1.125rem;
+  --readout-line-height: 1.375rem;
+  --nav-icon-size: 1.0625rem;
+  --search-icon-size: 1rem;
+  --bar-control-height: 2.125rem;
+  --filter-height: 2.125rem;
+  --bar-row-height: max(var(--bar-control-height), var(--filter-height));
+  --bar-height: calc(var(--bar-row-height) + 21px + env(safe-area-inset-top));
 
   /* Keeps a focused link clear of the sticky bar. */
   scroll-padding-top: calc(var(--bar-height) + 8px);
 
   font-family: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size: 14px;
+  font-size: 100%;
   line-height: 1.4;
   background: var(--bg);
   color: var(--text);
@@ -73,6 +89,7 @@ body {
   margin: 0;
   min-height: 100dvh;
   background: var(--bg);
+  font-size: var(--font-body);
 }
 
 ::selection {
@@ -129,7 +146,7 @@ input {
   grid-template-columns: minmax(max-content, 1fr) minmax(0, 420px) 1fr;
   align-items: center;
   gap: 8px 16px;
-  padding: 10px var(--gutter);
+  padding: calc(10px + env(safe-area-inset-top)) var(--gutter-end) 10px var(--gutter-start);
   background: var(--bg);
   border-bottom: 1px solid var(--border);
 }
@@ -139,7 +156,7 @@ input {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  font-size: 14px;
+  font-size: var(--font-title);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -160,6 +177,12 @@ input {
   grid-column: 3;
 }
 
+.title > .lucide,
+.bar > .icon-button > .lucide {
+  width: var(--nav-icon-size);
+  height: var(--nav-icon-size);
+}
+
 .filter {
   grid-row: 1;
   grid-column: 2;
@@ -167,11 +190,17 @@ input {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 34px;
+  height: var(--filter-height);
   padding-inline: 10px 2px;
   background: var(--panel);
   border: 1px solid var(--border-strong);
   color: var(--text-3);
+}
+
+.filter > .lucide,
+.filter-clear > .lucide {
+  width: var(--search-icon-size);
+  height: var(--search-icon-size);
 }
 
 .filter:focus-within {
@@ -196,7 +225,7 @@ input {
 }
 
 .filter-count {
-  font-size: 11px;
+  font-size: var(--font-count);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -220,15 +249,18 @@ input {
 }
 
 .icon-button {
-  --icon-button-size: 34px;
+  --icon-button-size: var(--bar-control-height);
 
   display: grid;
   place-items: center;
   justify-self: end;
   width: var(--icon-button-size);
   height: var(--icon-button-size);
-  /* Lines the 17px glyph up with the content edge, as the home icon is on the left. */
-  margin-inline-end: calc((17px - var(--icon-button-size)) / 2);
+  /* Lines the glyph up with the content edge, as the home icon is on the left. */
+  margin-inline-end: max(
+    calc((var(--nav-icon-size) - var(--icon-button-size)) / 2),
+    calc(2px - var(--gutter-end))
+  );
   padding: 0;
   background: transparent;
   border: 0;
@@ -255,10 +287,10 @@ input {
 
 .settings {
   position: fixed;
-  inset: 55px var(--gutter) auto auto;
+  inset: var(--bar-height) var(--gutter-end) auto auto;
   width: 348px;
   max-width: calc(100vw - 2 * var(--gutter));
-  max-height: calc(100dvh - 70px);
+  max-height: calc(100dvh - var(--bar-height) - 15px);
   margin: 0;
   padding: 0;
   overflow-y: auto;
@@ -268,6 +300,7 @@ input {
 }
 
 .choice {
+  container-type: inline-size;
   padding: 12px 14px 14px;
   border-bottom: 1px solid var(--border);
 }
@@ -281,7 +314,7 @@ input {
   width: 100%;
   margin-bottom: 8px;
   padding: 0;
-  font-size: 10.5px;
+  font-size: var(--font-legend);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-3);
@@ -290,18 +323,17 @@ input {
 .segments {
   clear: both;
   display: flex;
+  gap: 1px;
   border: 1px solid var(--border-strong);
+  background: var(--border-strong);
 }
 
 .segment {
+  display: flex;
   flex: 1 1 0;
   min-width: 0;
   position: relative;
-  border-inline-start: 1px solid var(--border-strong);
-}
-
-.segment:first-child {
-  border-inline-start: 0;
+  background: var(--panel);
 }
 
 .segment input {
@@ -313,15 +345,18 @@ input {
 }
 
 .segment span {
+  flex: 1;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 6px;
   min-height: 30px;
   padding-inline: 2px;
-  font-size: 12px;
+  font-size: var(--font-control);
   color: var(--text-2);
-  white-space: nowrap;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .segment:hover span {
@@ -347,6 +382,8 @@ input {
   flex-direction: column;
   gap: 20px;
   padding: var(--gutter);
+  padding-inline: var(--gutter-start) var(--gutter-end);
+  padding-bottom: max(var(--gutter), env(safe-area-inset-bottom));
 }
 
 .group.collapsed + .group.collapsed {
@@ -384,7 +421,7 @@ input {
   padding: 0;
   background: none;
   border: 0;
-  font-size: 11px;
+  font-size: var(--font-label);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-align: start;
@@ -429,7 +466,7 @@ input {
 }
 
 .group-count {
-  font-size: 11px;
+  font-size: var(--font-count);
   font-variant-numeric: tabular-nums;
   color: var(--text-3);
 }
@@ -546,7 +583,7 @@ input {
   min-width: 0;
   overflow: hidden;
   padding: 4px var(--readout-inline);
-  font-size: 11px;
+  font-size: var(--font-count);
   color: var(--text-2);
 }
 
@@ -556,9 +593,9 @@ input {
 
 .readout-value {
   flex: none;
-  font-size: 18px;
+  font-size: var(--font-figure);
   font-weight: 600;
-  line-height: 22px;
+  line-height: var(--readout-line-height);
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
@@ -580,8 +617,8 @@ input {
 .readout-off {
   display: block;
   padding: 4px var(--readout-inline);
-  font-size: 11px;
-  line-height: 22px;
+  font-size: var(--font-count);
+  line-height: var(--readout-line-height);
   color: var(--text-3);
 }
 
@@ -599,7 +636,7 @@ input {
 }
 
 .cell-description {
-  font-size: 12.5px;
+  font-size: var(--font-description);
   color: var(--text-2);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -613,7 +650,7 @@ input {
   gap: 5px;
   padding: 1px 5px;
   border: 1px solid var(--border-strong);
-  font-size: 11px;
+  font-size: var(--font-count);
   color: var(--text-2);
 }
 
@@ -720,15 +757,23 @@ input {
   background: var(--hover);
 }
 
-/* Touch */
+/* Readable text and targets on phones and touch devices, including landscape. */
 
-@media (pointer: coarse) {
+@media (max-width: 640px), (pointer: coarse) {
   :root {
-    --bar-height: 67px;
-  }
-
-  .filter input {
-    font-size: 16px;
+    --font-title: 1.0625rem;
+    --font-body: 1.0625rem;
+    --font-description: 0.9375rem;
+    --font-control: 1rem;
+    --font-label: 0.8125rem;
+    --font-legend: 0.8125rem;
+    --font-count: 0.8125rem;
+    --font-figure: 1.25rem;
+    --readout-line-height: 1.625rem;
+    --nav-icon-size: 1.375rem;
+    --search-icon-size: 1.25rem;
+    --bar-control-height: max(44px, 2.75rem);
+    --filter-height: max(46px, 2.875rem);
   }
 
   .segment span {
@@ -736,12 +781,7 @@ input {
   }
 
   .filter {
-    height: 46px;
     padding-inline-end: 0;
-  }
-
-  .icon-button {
-    --icon-button-size: 44px;
   }
 
   .filter-clear {
@@ -757,10 +797,24 @@ input {
     min-height: 44px;
   }
 
-  .settings {
-    top: 67px;
+  .tag {
+    max-width: 45%;
+  }
+}
+
+/* Keep seven column choices comfortably tappable in narrow settings panels. */
+@container (max-width: 313px) {
+  .segments-wrap {
+    flex-wrap: wrap;
   }
 
+  .segments-wrap .segment {
+    flex-basis: calc(25% - 1px);
+    min-width: 44px;
+  }
+}
+
+@media (pointer: coarse) {
   .enter-hint {
     display: none;
   }
@@ -770,7 +824,9 @@ input {
 
 @media (max-width: 640px) {
   :root {
-    --bar-height: 97px;
+    --bar-height: calc(
+      var(--bar-control-height) + var(--filter-height) + 29px + env(safe-area-inset-top)
+    );
   }
 
   .bar {
@@ -790,6 +846,9 @@ input {
     inset: auto 0 0;
     width: 100%;
     max-width: none;
+    max-height: calc(100dvh - max(16px, env(safe-area-inset-top)));
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
     border-width: 1px 0 0;
   }
 
@@ -798,12 +857,6 @@ input {
     white-space: normal;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-  }
-}
-
-@media (max-width: 640px) and (pointer: coarse) {
-  :root {
-    --bar-height: 119px;
   }
 }
 
