@@ -319,7 +319,7 @@ Every corner is square (0px). Outlines are 1px, at two strengths: a mild hairlin
 
 ## Components
 
-Motion across all of these is limited to a 100ms ease-out change of color or background on cells and icon buttons. Nothing moves, and reduced-motion removes transitions entirely. Every control shows a 2px amber focus ring offset by 2px unless noted.
+Motion across all of these is limited to a 100ms ease-out change of color or background on cells and icon buttons. Nothing moves, except the groups under the finger during Pull to Reload, and reduced-motion removes transitions entirely. Every control shows a 2px amber focus ring offset by 2px unless noted.
 
 ### Buttons
 
@@ -389,6 +389,16 @@ A full-width strip-toned title bar with a hairline outline: a 14px chevron and t
 - **While filtering:** Matching groups show open whatever their saved state, and the bar is disabled with a faint chevron, so Tab from the filter reaches results directly.
 - **Ungrouped links:** No bar, so they never fold.
 
+### Pull to Reload
+
+The installed app's stand-in for the browser's pull-to-refresh, which installed apps lack. Browser tabs keep their own gesture and never show it.
+
+- **Gesture:** One finger dragging down from the top of the page, starting outside the settings sheet. Upward or sideways drags, a second finger, or a scrolled page leave it to the browser. The installed app sets `overscroll-behavior-y: none`, so the page never bounces.
+- **Follow:** The bar stays put. The groups follow the finger at half its travel, up to 96px, and a strip on the ground fills the gap under the bar: an arrow and a line of copy, centered, in the Control role and soft ink.
+- **Armed:** At 64px the arrow swaps from down to up without rotating, the copy changes from "Pull to reload" to "Release to reload", and both step up to ink. There is no haptic.
+- **Release:** Released while armed, the groups hold at 64px with a static rotate glyph and "Reloading" in ink, and the page reloads. Released earlier, the groups and strip settle back over 150ms ease-out, or at once under reduced motion.
+- **Accessibility:** The strip is hidden from assistive technology, because the touch gesture is its own feedback.
+
 ### Notice
 
 An inline panel in the content column for the empty, no-match, and load-failure states: a title line, short plain copy, and a text button when there is a recovery action.
@@ -425,4 +435,4 @@ The top bar keeps its home icon; the mark does not appear in the interface. `doc
 - **Don't** use amber for hover, decoration, or emphasis in copy.
 - **Don't** tint chrome with a second hue; logos, configured label squares and a non-zero down count are the only other color.
 - **Don't** use tracked uppercase as a decorative line above other text.
-- **Don't** animate position, scale, or layout.
+- **Don't** animate position, scale, or layout. The one exception is the Pull to Reload settle.

@@ -502,6 +502,54 @@ describe('collapsing groups', () => {
   })
 })
 
+const at = (clientY: number) => ({ touches: [{ clientX: 0, clientY }] })
+const strip = () => document.querySelector<HTMLElement>('.pull')
+const groups = () => screen.getByRole('main')
+
+function installApp() {
+  const browserTab = window.matchMedia
+  vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+    ...browserTab(query),
+    matches: query === '(display-mode: standalone)',
+  }))
+}
+
+describe('pull to reload', () => {
+  it('reveals the strip under the bar as the groups follow the finger', async () => {
+    installApp()
+    await renderLoaded()
+    fireEvent.touchStart(document, at(100))
+    fireEvent.touchMove(document, at(160))
+    expect(strip()?.textContent).toBe('Pull to reload')
+    expect(strip()?.style.height).toBe('30px')
+    expect(groups().style.transform).toBe('translateY(30px)')
+    fireEvent.touchMove(document, at(300))
+    expect(strip()?.textContent).toBe('Release to reload')
+    fireEvent.touchEnd(document, { touches: [] })
+    expect(strip()?.textContent).toBe('Reloading')
+    expect(groups().style.transform).toBe('translateY(64px)')
+  })
+
+  it('settles back after a short pull', async () => {
+    installApp()
+    await renderLoaded()
+    fireEvent.touchStart(document, at(100))
+    fireEvent.touchMove(document, at(160))
+    fireEvent.touchEnd(document, { touches: [] })
+    expect(strip()?.textContent).toBe('Pull to reload')
+    expect(strip()?.style.height).toBe('0px')
+    expect(groups().style.transform).toBe('')
+  })
+
+  it('leaves the gesture to the browser in a tab', async () => {
+    await renderLoaded()
+    fireEvent.touchStart(document, at(100))
+    fireEvent.touchMove(document, at(300))
+    expect(strip()).toBeNull()
+    expect(groups().style.transform).toBe('')
+  })
+})
+
 describe('settings', () => {
   it('forces new tabs and hides the link setting in an installed app', async () => {
     localStorage.setItem('pin.settings.v1', JSON.stringify({ linkTarget: 'same' }))

@@ -375,6 +375,51 @@ input {
   outline-offset: 2px;
 }
 
+/* Pull to reload, installed app only */
+
+@media (display-mode: standalone) {
+  :root {
+    overscroll-behavior-y: none;
+  }
+}
+
+/* Fills the gap the groups leave under the bar as they follow the finger. */
+.pull {
+  position: fixed;
+  top: var(--bar-height);
+  inset-inline: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: var(--font-control);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pull.armed,
+.pull.reloading {
+  color: var(--text);
+}
+
+.pull > .lucide {
+  flex: none;
+  width: var(--search-icon-size);
+  height: var(--search-icon-size);
+}
+
+.pull.settling {
+  transition: height 150ms ease-out;
+}
+
+.groups.settling {
+  transition: transform 150ms ease-out;
+}
+
 /* Groups */
 
 .groups {

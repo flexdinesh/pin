@@ -39,7 +39,7 @@ Links, labels, groups and status widgets on the links themselves: one file, no a
 - Icon sources: dashboard-icons, `mdi-` and `si-` (monochrome, optional hex color), `sh-`, and http(s) URLs. Multicolor logos appear beside monochrome glyphs.
 - Settings, per browser: theme (system, light, dark), columns, density, link target, show descriptions.
 - Type anywhere to filter by name, description, label or group; Enter opens the top match and Tab moves to the results. Touch devices get a visible search control.
-- Installable from the browser's own UI, with no in-app install control and no offline mode. The installed app always opens links outside its window and hides the link target setting.
+- Installable from the browser's own UI, with no in-app install control and no offline mode. The installed app always opens links outside its window and hides the link target setting. Lacking the browser's pull-to-refresh, it reloads the page when pulled down from the top.
 - No auth, no accounts, no in-app editing. No accent or reorder settings. Collapsing is a direct toggle on the group, never a setting.
 
 ## Brand Commitments

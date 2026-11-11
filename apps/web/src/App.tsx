@@ -1,7 +1,10 @@
+import ArrowDown from 'lucide-solid/icons/arrow-down'
+import ArrowUp from 'lucide-solid/icons/arrow-up'
 import ChevronDown from 'lucide-solid/icons/chevron-down'
 import ChevronRight from 'lucide-solid/icons/chevron-right'
 import CornerDownLeft from 'lucide-solid/icons/corner-down-left'
 import House from 'lucide-solid/icons/house'
+import RotateCw from 'lucide-solid/icons/rotate-cw'
 import Search from 'lucide-solid/icons/search'
 import SettingsIcon from 'lucide-solid/icons/settings'
 import X from 'lucide-solid/icons/x'
@@ -22,6 +25,7 @@ import { fetchConfig, type Bookmark, type Config, type Group } from './api'
 import { BookmarkIcon } from './BookmarkIcon'
 import { createCollapse, type CollapseStore } from './collapse'
 import { filterGroups, topMatch } from './filter'
+import { createPullToReload, type PullToReload } from './pull'
 import { createSettings, type SettingsStore } from './settings'
 import { SettingsPanel } from './SettingsPanel'
 import { fitTiles, keepTilesFitted } from './tiles'
@@ -283,6 +287,40 @@ function Dashboard(props: {
   )
 }
 
+// True while the content tracks the finger. Otherwise any offset eases back.
+const following = (pull: PullToReload) => pull.phase() === 'pulling' || pull.phase() === 'armed'
+
+// The touch gesture is its own feedback, so this stays out of the accessibility tree.
+function PullIndicator(props: { pull: PullToReload }) {
+  return (
+    <div
+      class="pull"
+      classList={{
+        armed: props.pull.phase() === 'armed',
+        reloading: props.pull.phase() === 'reloading',
+        settling: !following(props.pull),
+      }}
+      style={{ height: `${props.pull.distance()}px` }}
+      aria-hidden="true"
+    >
+      <Switch>
+        <Match when={props.pull.phase() === 'reloading'}>
+          <RotateCw size={16} stroke-width={1.75} />
+          Reloading
+        </Match>
+        <Match when={props.pull.phase() === 'armed'}>
+          <ArrowUp size={16} stroke-width={1.75} />
+          Release to reload
+        </Match>
+        <Match when={true}>
+          <ArrowDown size={16} stroke-width={1.75} />
+          Pull to reload
+        </Match>
+      </Switch>
+    </div>
+  )
+}
+
 function startsFilter(event: KeyboardEvent, hasQuery: boolean): boolean {
   if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return false
   const types = event.key.length === 1 && event.key !== ' '
@@ -295,6 +333,7 @@ function startsFilter(event: KeyboardEvent, hasQuery: boolean): boolean {
 export function App() {
   const store = createSettings()
   const collapse = createCollapse()
+  const pull = createPullToReload(store.installed, () => window.location.reload())
   const [config, { refetch }] = createResource(fetchConfig)
   const [query, setQuery] = createSignal('')
   const [input, setInput] = createSignal<HTMLInputElement>()
@@ -458,7 +497,18 @@ export function App() {
         </div>
       </header>
       <SettingsPanel store={store} id={settingsPanelId} />
-      <main class="groups" ref={setResults} onClick={onResultsClick}>
+      <Show when={store.installed}>
+        <PullIndicator pull={pull} />
+      </Show>
+      <main
+        class="groups"
+        classList={{ settling: !following(pull) }}
+        style={{
+          transform: pull.distance() > 0 ? `translateY(${pull.distance()}px)` : undefined,
+        }}
+        ref={setResults}
+        onClick={onResultsClick}
+      >
         <Switch>
           <Match when={config.error !== undefined}>
             <div class="notice" role="alert">
