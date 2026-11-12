@@ -28,7 +28,7 @@ import { filterGroups, topMatch } from './filter'
 import { createPullToReload, type PullToReload } from './pull'
 import { createSettings, type SettingsStore } from './settings'
 import { SettingsPanel } from './SettingsPanel'
-import { fitTiles, keepTilesFitted } from './tiles'
+import { keepTilesFitted, packTiles } from './tiles'
 import { createWidgetStore, type WidgetState, type WidgetStore } from './widgets'
 
 const settingsPanelId = 'settings-panel'
@@ -149,18 +149,23 @@ function GroupTiles(props: {
   widgets: WidgetStore
 }) {
   const [list, setList] = createSignal<HTMLUListElement>()
-  // Settings change the lanes and the text. The filter adds the Enter hint.
+  // The Columns setting caps how many tiles share a row.
+  const maxPerRow = () => {
+    const columns = props.store.settings().columns
+    return columns === 'auto' ? Infinity : columns
+  }
+  // Settings change the row cap and the text. The filter adds the Enter hint.
   createEffect(
     on(
       [list, () => props.group.bookmarks, () => props.store.settings(), () => props.filtering],
       ([element]) => {
-        if (element) fitTiles(element)
+        if (element) packTiles(element, maxPerRow())
       },
     ),
   )
   createEffect(() => {
     const element = list()
-    if (element) onCleanup(keepTilesFitted(element))
+    if (element) onCleanup(keepTilesFitted(element, maxPerRow))
   })
   return (
     <ul class="cells" ref={setList}>

@@ -1,6 +1,6 @@
 ---
 name: pin
-description: Square link tiles on precise lanes in light and dark, sharp corners and mild borders.
+description: Square link tiles sized to their content in light and dark, sharp corners and mild borders.
 colors:
   bg: "light-dark(#ffffff, #06070b)"
   panel: "light-dark(#ffffff, #0b0c12)"
@@ -183,7 +183,7 @@ components:
 
 **Creative North Star: "The Sharpened Grid"**
 
-The familiar dashboard grid, played straight and sharpened. Links sit in square tiles on precise lanes instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.
+The familiar dashboard grid, played straight and sharpened. Links sit in square tiles sized to their content in justified rows instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.
 
 The world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from four places only: the logos themselves, small squares on configured labels, a single amber signal that marks where input is and what Enter will do, and red on a count of things that are down.
 
@@ -191,7 +191,7 @@ This system rejects sidebars, free-standing stat cards, hero headers, and soft s
 
 **Key Characteristics:**
 
-- Square tiles on lanes, 8px apart, widening to two lanes only when their content needs it
+- Square tiles sized to their content, 8px apart, in justified rows that interlock vertically; equal lanes on phones
 - Neutral title bars with a small tracked uppercase group name and a tabular count
 - Zero radius on every surface and control
 - One amber accent, reserved for focus, top match, and selected settings
@@ -279,9 +279,9 @@ The sticky bar is a three-track grid: title at left, filter in the middle at up 
 
 The shared bar height derives from the control and filter dimensions: their maximum plus 21px and the top safe-area inset in one row; their sum plus 29px and the top inset in two rows. The settings popover uses that same height for its top offset and available height. The viewport uses `viewport-fit=cover`. Header and content side gutters take the larger of the normal gutter and each side's safe-area inset; the header adds the top inset, and content bottom padding takes the larger of its gutter and the bottom inset. The phone bottom sheet adds bottom and side safe-area padding and leaves at least 16px or the top inset above its maximum height.
 
-Tiles use an auto-filling grid of lanes with a minimum track that responds to the viewport (160px to 244px, or 150px to 190px at compact density), 8px apart. A chosen column count caps the lanes at that number, and they narrow to 150px before a lane drops. Each row takes the height of its tallest tile, which its neighbors stretch to match, so tile tops line up across lanes. Phones target two lanes; below 360px the minimum track falls to 130px to hold them.
+Above 640px, tiles have no lanes. Each tile takes the width and height of its content, measured because both depend on rendered text. Tiles fill rows in config order, 8px apart. A row is full once the next tile does not fit, or once it holds the chosen column count, which reads as tiles per row. A full row widens its tiles in proportion to their content until it reaches both edges; a last row that is not full keeps its content widths and leaves the rest of the row open. Each tile then rises until it meets the nearest tile above it that it overlaps, so a short tile's neighbour below sits higher and rows interlock. Tile tops do not line up across a row. DOM, Tab, and screen reader order stay config order.
 
-A tile whose content does not fit one lane takes two. The content is measured because it depends on rendered text, and grid placement does the rest, so tiles keep config order. Larger text naturally produces more two-lane tiles and taller cells. A two-lane tile that does not fit at a row's end moves to the next row and leaves its lane open, as do empty lanes in the last row. There is no filler.
+At 640px and below, phones keep equal lanes: an auto-filling grid with a 160px minimum track (150px at compact density), 8px apart, targeting two lanes; below 360px the minimum track falls to 130px to hold them. A chosen column count caps the lanes, which narrow to 150px before a lane drops. Each row takes the height of its tallest tile, which its neighbors stretch to match. A tile whose content does not fit one lane takes two, and a two-lane tile that does not fit at a row's end moves to the next row and leaves its lane open.
 
 Density is one switch, not many: compact tightens the cell padding, gap, minimum track, and icon together. It never reduces role font sizes. Spacing otherwise steps through 8px inside controls and between tiles, 12px between cell contents, 20px between groups, and 14px as the inline inset of title bars.
 
@@ -289,7 +289,7 @@ At 640px and below or on a coarse pointer, controls reach at least 44px and the 
 
 ### Named Rules
 
-**The Lane Rule.** Inside a group, tiles sit on equal lanes, in rows sized to their tallest tile, 8px apart. A tile takes a second lane only when its content does not fit one.
+**The Content Size Rule.** Inside a group, each tile is as wide and as tall as its content, 8px from its neighbours. Full rows stretch to both edges and rows interlock vertically; only phones keep equal lanes.
 
 **The Everything Is Visible Rule.** All links are on the page at rest, unless the viewer folded their group. Groups start open, the filter reaches inside folded ones, and the grid never paginates or scrolls within a group.
 
@@ -368,7 +368,7 @@ The signature element. A whole-tile link at a 44px minimum height, with a hairli
 - **Focus:** The amber ring sits inside the tile (offset -2px).
 - **Top match:** While filtering, the cell Enter will open takes the amber wash, the softer amber ring, and a small outlined Enter hint at its far end. Coarse pointers hide the hint. Once a result has keyboard focus, Enter opens that result, so the wash and hint move to it and the top match returns to rest.
 - **Icon:** Multicolor logos and single-color masks share a contained box. When a source is missing or fails, a monogram stands in: the name's first letter or digit in weight 600 at half the icon size, in soft ink, in a bordered square.
-- **Label tag:** At the tile's far end, before any Enter hint, at rest and in results: the label's name in the Count role and soft ink, in a firm hairline outline, truncating past 16ch. On phones and coarse pointers, the tag occupies at most 45% of its row so enlarged labels leave room for the bookmark name and cannot push the tile outside the viewport. A configured color adds a 6px square before the name. Its width counts when a tile is measured, so a tag can take a tile to a second lane.
+- **Label tag:** At the tile's far end, before any Enter hint, at rest and in results: the label's name in the Count role and soft ink, in a firm hairline outline, truncating past 16ch. On phones and coarse pointers, the tag occupies at most 45% of its row so enlarged labels leave room for the bookmark name and cannot push the tile outside the viewport. A configured color adds a 6px square before the name. Its width counts when a tile is measured, so a tag widens its tile, or takes it to a second lane on phones.
 
 ### Widget Readout
 
@@ -379,7 +379,7 @@ The bottom of a bookmark cell whose bookmark has a widget, inside the same link.
 - **Loading:** Dashes in faint ink, hidden from assistive technology. Nothing moves.
 - **Unreachable:** One line in faint ink, "Can't reach Gatus", at the same height. The link still works, and old counts never stay on screen.
 - **Top match and focus:** The whole tile takes them as any cell does; the readout adds nothing.
-- **Layout:** Excluded when a tile is measured, so counts arriving or changing never move it to another lane. The whole tile keeps its height between refreshes. A group holding a widget aligns every tile's content to the top, so names share a line, with each icon centered on its text. In a narrow lane the figure holds and its label clips. Counts refresh without a live region, so a screen reader is not interrupted.
+- **Layout:** Excluded when a tile is measured, so counts arriving or changing never change its width or move it. The whole tile keeps its height between refreshes, so tiles are not placed again on a refresh. A group holding a widget aligns every tile's content to the top, so names share a line, with each icon centered on its text. In a narrow lane the figure holds and its label clips. Counts refresh without a live region, so a screen reader is not interrupted.
 
 ### Group Header
 
@@ -417,7 +417,7 @@ The top bar keeps its home icon; the mark does not appear in the interface. `doc
 
 - **Do** define every new color as one `light-dark()` pair, and meet WCAG AA in both themes.
 - **Do** use zero radius and a 1px hairline on every new surface and control.
-- **Do** keep tiles on lanes inside a group, widening a tile only when its content does not fit.
+- **Do** size tiles to their content inside a group, stretching only full rows, and keep equal lanes on phones.
 - **Do** reserve amber for focus, the top match, and selected settings.
 - **Do** use Lucide icons at stroke 1.75 with square caps and miter joins.
 - **Do** give a monogram fallback to anything that loads an external icon.
