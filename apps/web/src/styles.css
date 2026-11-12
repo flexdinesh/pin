@@ -71,7 +71,8 @@
   --icon-size: 20px;
 }
 
-/* At most --columns tracks, which narrow to 150px before dropping a column. */
+/* Phones: at most --columns tracks, which narrow to 150px before dropping a column.
+   Wider screens read the setting as tiles per row, in tiles.ts. */
 :root[data-columns] {
   --cell-track: max(
     150px,
@@ -516,7 +517,7 @@ input {
   color: var(--text-3);
 }
 
-/* Rows size to their tallest tile, so tile tops stay aligned across lanes. */
+/* Phones: rows size to their tallest tile, so tile tops stay aligned across lanes. */
 .cells {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--cell-track), 1fr));
@@ -529,6 +530,20 @@ input {
 
 .cells > li[data-wide] {
   grid-column: span 2;
+}
+
+/* Wider screens: each tile takes its content size, and tiles.ts places it. */
+.cells[data-packed] {
+  display: block;
+  position: relative;
+  height: var(--packed-height);
+}
+
+.cells[data-packed] > li {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: var(--w);
 }
 
 /* Set by fitTiles for one synchronous read, so it never paints. */
