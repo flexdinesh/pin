@@ -71,7 +71,7 @@ function write(settings: Settings): void {
   }
 }
 
-const themeColors = { light: '#ffffff', dark: '#06070b' }
+const themeColors = { light: '#ffffff', dark: '#21252b' }
 
 // An installed app's title bar follows these, so an explicit theme has to override both.
 function applyThemeColor(theme: Theme): void {

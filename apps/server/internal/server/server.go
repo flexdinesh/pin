@@ -17,7 +17,7 @@ const (
 	cacheImmutable = "public, max-age=31536000, immutable"
 )
 
-const appColor = "#06070b"
+const appColor = "#21252b"
 
 type manifestIcon struct {
 	Src     string `json:"src"`
