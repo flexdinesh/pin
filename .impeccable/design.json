@@ -7,52 +7,52 @@
       "bg": {
         "role": "neutral",
         "displayName": "Ground",
-        "canonical": "light-dark(#ffffff, #06070b)",
+        "canonical": "light-dark(#ffffff, #21252b)",
         "tonalRamp": [
-          "oklch(15% 0.007 272)",
-          "oklch(26% 0.010 272)",
-          "oklch(38% 0.010 272)",
-          "oklch(49% 0.010 272)",
-          "oklch(61% 0.010 272)",
-          "oklch(72% 0.010 272)",
-          "oklch(84% 0.010 272)",
-          "oklch(95% 0.004 272)"
+          "oklch(15% 0.009 258)",
+          "oklch(26% 0.013 258)",
+          "oklch(38% 0.013 258)",
+          "oklch(49% 0.013 258)",
+          "oklch(61% 0.013 258)",
+          "oklch(72% 0.013 258)",
+          "oklch(84% 0.013 258)",
+          "oklch(95% 0.005 258)"
         ]
       },
       "panel": {
         "role": "neutral",
         "displayName": "Panel",
-        "canonical": "light-dark(#ffffff, #0b0c12)",
+        "canonical": "light-dark(#ffffff, #272b32)",
         "tonalRamp": [
-          "oklch(15% 0.009 277)",
-          "oklch(26% 0.013 277)",
-          "oklch(38% 0.013 277)",
-          "oklch(49% 0.013 277)",
-          "oklch(61% 0.013 277)",
-          "oklch(72% 0.013 277)",
-          "oklch(84% 0.013 277)",
-          "oklch(95% 0.005 277)"
+          "oklch(15% 0.010 262)",
+          "oklch(26% 0.014 262)",
+          "oklch(38% 0.014 262)",
+          "oklch(49% 0.014 262)",
+          "oklch(61% 0.014 262)",
+          "oklch(72% 0.014 262)",
+          "oklch(84% 0.014 262)",
+          "oklch(95% 0.006 262)"
         ]
       },
       "strip": {
         "role": "neutral",
         "displayName": "Strip",
-        "canonical": "light-dark(#f2f3f6, #11131c)",
+        "canonical": "light-dark(#f2f3f6, #2d3139)",
         "tonalRamp": [
-          "oklch(15% 0.013 275)",
-          "oklch(26% 0.019 275)",
-          "oklch(38% 0.019 275)",
-          "oklch(49% 0.019 275)",
-          "oklch(61% 0.019 275)",
-          "oklch(72% 0.019 275)",
-          "oklch(84% 0.019 275)",
-          "oklch(95% 0.007 275)"
+          "oklch(15% 0.011 264)",
+          "oklch(26% 0.015 264)",
+          "oklch(38% 0.015 264)",
+          "oklch(49% 0.015 264)",
+          "oklch(61% 0.015 264)",
+          "oklch(72% 0.015 264)",
+          "oklch(84% 0.015 264)",
+          "oklch(95% 0.006 264)"
         ]
       },
       "hover": {
         "role": "neutral",
         "displayName": "Hover Tint",
-        "canonical": "light-dark(#0b0d140a, #c0caf50e)",
+        "canonical": "light-dark(#0b0d140a, #c0caf510)",
         "tonalRamp": [
           "oklch(15% 0.044 275)",
           "oklch(26% 0.061 275)",
@@ -67,7 +67,7 @@
       "border": {
         "role": "neutral",
         "displayName": "Hairline",
-        "canonical": "light-dark(#0b0d141a, #c0caf51c)",
+        "canonical": "light-dark(#0b0d141a, #c0caf521)",
         "tonalRamp": [
           "oklch(15% 0.044 275)",
           "oklch(26% 0.061 275)",
@@ -82,7 +82,7 @@
       "border-strong": {
         "role": "neutral",
         "displayName": "Firm Hairline",
-        "canonical": "light-dark(#0b0d1438, #c0caf533)",
+        "canonical": "light-dark(#0b0d1438, #c0caf53d)",
         "tonalRamp": [
           "oklch(15% 0.044 275)",
           "oklch(26% 0.061 275)",
@@ -112,37 +112,37 @@
       "text-2": {
         "role": "neutral",
         "displayName": "Soft Ink",
-        "canonical": "light-dark(#454c5e, #a2aaca)",
+        "canonical": "light-dark(#454c5e, #adb5d2)",
         "tonalRamp": [
-          "oklch(15% 0.034 274)",
-          "oklch(26% 0.047 274)",
-          "oklch(38% 0.047 274)",
-          "oklch(49% 0.047 274)",
-          "oklch(61% 0.047 274)",
-          "oklch(72% 0.047 274)",
-          "oklch(84% 0.047 274)",
-          "oklch(95% 0.017 274)"
+          "oklch(15% 0.030 273)",
+          "oklch(26% 0.042 273)",
+          "oklch(38% 0.042 273)",
+          "oklch(49% 0.042 273)",
+          "oklch(61% 0.042 273)",
+          "oklch(72% 0.042 273)",
+          "oklch(84% 0.042 273)",
+          "oklch(95% 0.017 273)"
         ]
       },
       "text-3": {
         "role": "neutral",
         "displayName": "Faint Ink",
-        "canonical": "light-dark(#5c6376, #8088aa)",
+        "canonical": "light-dark(#5c6376, #9ea5c1)",
         "tonalRamp": [
-          "oklch(15% 0.037 274)",
-          "oklch(26% 0.052 274)",
-          "oklch(38% 0.052 274)",
-          "oklch(49% 0.052 274)",
-          "oklch(61% 0.052 274)",
-          "oklch(72% 0.052 274)",
-          "oklch(84% 0.052 274)",
-          "oklch(95% 0.019 274)"
+          "oklch(15% 0.029 274)",
+          "oklch(26% 0.041 274)",
+          "oklch(38% 0.041 274)",
+          "oklch(49% 0.041 274)",
+          "oklch(61% 0.041 274)",
+          "oklch(72% 0.041 274)",
+          "oklch(84% 0.041 274)",
+          "oklch(95% 0.017 274)"
         ]
       },
       "down": {
         "role": "tertiary",
         "displayName": "Down Red",
-        "canonical": "light-dark(#b91c1c, #f87171)",
+        "canonical": "light-dark(#b91c1c, #f98383)",
         "tonalRamp": [
           "oklch(15% 0.060 25)",
           "oklch(26% 0.100 25)",
@@ -172,7 +172,7 @@
       "accent-wash": {
         "role": "primary",
         "displayName": "Amber Wash",
-        "canonical": "light-dark(#b4530912, #fbbf2412)",
+        "canonical": "light-dark(#b4530912, #fbbf241a)",
         "tonalRamp": [
           "oklch(15% 0.117 84)",
           "oklch(26% 0.164 84)",
@@ -411,7 +411,7 @@
   ],
   "narrative": {
     "northStar": "The Sharpened Grid",
-    "overview": "The familiar dashboard grid, played straight and sharpened. Links sit in square tiles sized to their content in justified rows instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.\n\nThe world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from four places only: the logos themselves, small squares on configured labels, a single amber signal that marks where input is and what Enter will do, and red on a count of things that are down.\n\nThis system rejects sidebars, free-standing stat cards, hero headers, and soft shadows. It is a dashboard and does not pretend otherwise; the craft is in the precision of the grid rather than in a concept layered over it.",
+    "overview": "The familiar dashboard grid, played straight and sharpened. Links sit in square tiles sized to their content in justified rows instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.\n\nThe world is monochrome and quiet by construction. A pure white or deep slate ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from four places only: the logos themselves, small squares on configured labels, a single amber signal that marks where input is and what Enter will do, and red on a count of things that are down.\n\nThis system rejects sidebars, free-standing stat cards, hero headers, and soft shadows. It is a dashboard and does not pretend otherwise; the craft is in the precision of the grid rather than in a concept layered over it.",
     "keyCharacteristics": [
       "Square tiles sized to their content, 8px apart, in justified rows that interlock vertically; equal lanes on phones",
       "Neutral header strips with a small tracked uppercase group name and a tabular count",

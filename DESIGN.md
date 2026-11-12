@@ -2,18 +2,18 @@
 name: pin
 description: Square link tiles sized to their content in light and dark, sharp corners and mild borders.
 colors:
-  bg: "light-dark(#ffffff, #06070b)"
-  panel: "light-dark(#ffffff, #0b0c12)"
-  strip: "light-dark(#f2f3f6, #11131c)"
-  hover: "light-dark(#0b0d140a, #c0caf50e)"
-  border: "light-dark(#0b0d141a, #c0caf51c)"
-  border-strong: "light-dark(#0b0d1438, #c0caf533)"
+  bg: "light-dark(#ffffff, #21252b)"
+  panel: "light-dark(#ffffff, #272b32)"
+  strip: "light-dark(#f2f3f6, #2d3139)"
+  hover: "light-dark(#0b0d140a, #c0caf510)"
+  border: "light-dark(#0b0d141a, #c0caf521)"
+  border-strong: "light-dark(#0b0d1438, #c0caf53d)"
   text: "light-dark(#0b0d14, #e4e8f7)"
-  text-2: "light-dark(#454c5e, #a2aaca)"
-  text-3: "light-dark(#5c6376, #8088aa)"
-  down: "light-dark(#b91c1c, #f87171)"
+  text-2: "light-dark(#454c5e, #adb5d2)"
+  text-3: "light-dark(#5c6376, #9ea5c1)"
+  down: "light-dark(#b91c1c, #f98383)"
   accent: "light-dark(#b45309, #fbbf24)"
-  accent-wash: "light-dark(#b4530912, #fbbf2412)"
+  accent-wash: "light-dark(#b4530912, #fbbf241a)"
   accent-line: "light-dark(#b4530980, #fbbf2466)"
   icon-halo: "light-dark(#0b0d1459, #e4e8f7cc)"
   icon-halo-2: "light-dark(transparent, #e4e8f799)"
@@ -185,7 +185,7 @@ components:
 
 The familiar dashboard grid, played straight and sharpened. Links sit in square tiles sized to their content in justified rows instead of floating rounded cards, so the screen can be scanned at a glance. Nothing competes with the links: the only chrome above the grid is a thin top bar holding the title, a filter field, and a settings control.
 
-The world is monochrome and quiet by construction. A pure white or cool near-black ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from four places only: the logos themselves, small squares on configured labels, a single amber signal that marks where input is and what Enter will do, and red on a count of things that are down.
+The world is monochrome and quiet by construction. A pure white or deep slate ground, cool neutral ink, one typeface, zero radius, and low-alpha hairlines do all the structural work. Density is high and even, with every link given the same weight, because the visitor arrives knowing what they want. Color arrives from four places only: the logos themselves, small squares on configured labels, a single amber signal that marks where input is and what Enter will do, and red on a count of things that are down.
 
 This system rejects sidebars, free-standing stat cards, hero headers, and soft shadows. It is a dashboard and does not pretend otherwise; the craft is in the precision of the grid rather than in a concept layered over it.
 
@@ -199,29 +199,29 @@ This system rejects sidebars, free-standing stat cards, hero headers, and soft s
 
 ## Colors
 
-Cool neutrals tinted slightly toward blue, plus one amber that is darker and burnt in light mode and bright in dark mode. Every token is one `light-dark()` pair, so a theme is never a separate palette. The values below read light, then dark.
+Cool neutrals tinted slightly toward blue, plus one amber that is darker and burnt in light mode and bright in dark mode. Every token is one `light-dark()` pair, so a theme is never a separate palette. The dark ground is a deep slate taken from diffx's dark diff canvas; the rest of the dark palette is pin's own, tuned to it. The values below read light, then dark.
 
 ### Primary
 
 - **Signal Amber** (#b45309, #fbbf24): The focus ring, filter caret, text selection, the top match's Enter hint, the selected setting's ring, and native accent color. The favicon sets the same bright amber on the dark ground.
-- **Amber Wash** (#b4530912, #fbbf2412): The fill behind the top match and the selected setting.
+- **Amber Wash** (#b4530912, #fbbf241a): The fill behind the top match and the selected setting.
 - **Amber Line** (#b4530980, #fbbf2466): The softer ring around the top match and the border of its Enter hint.
 
 ### Status
 
-- **Down Red** (#b91c1c, #f87171): A widget's non-zero down count, figure and label together. The word "down" always accompanies it, so the state never depends on color alone.
+- **Down Red** (#b91c1c, #f98383): A widget's non-zero down count, figure and label together. The word "down" always accompanies it, so the state never depends on color alone.
 
 ### Neutral
 
-- **Ground** (#ffffff, #06070b): The page and sticky bar.
-- **Panel** (#ffffff, #0b0c12): Tiles, the filter field, the settings panel, and notices. Equal to the ground in light mode, one step lifted in dark.
-- **Strip** (#f2f3f6, #11131c): Group title bars only.
-- **Hover Tint** (#0b0d140a, #c0caf50e): The hover and pressed fill on any interactive surface.
-- **Hairline** (#0b0d141a, #c0caf51c): Tile and title bar outlines, the bar's bottom edge, and dividers between settings.
-- **Firm Hairline** (#0b0d1438, #c0caf533): Control outlines (filter, buttons, segments, monogram), label tags, and the settings panel, which must separate from what it overlays.
+- **Ground** (#ffffff, #21252b): The page and sticky bar.
+- **Panel** (#ffffff, #272b32): Tiles, the filter field, the settings panel, and notices. Equal to the ground in light mode, one step lifted in dark.
+- **Strip** (#f2f3f6, #2d3139): Group title bars only.
+- **Hover Tint** (#0b0d140a, #c0caf510): The hover and pressed fill on any interactive surface.
+- **Hairline** (#0b0d141a, #c0caf521): Tile and title bar outlines, the bar's bottom edge, and dividers between settings.
+- **Firm Hairline** (#0b0d1438, #c0caf53d): Control outlines (filter, buttons, segments, monogram), label tags, and the settings panel, which must separate from what it overlays.
 - **Ink** (#0b0d14, #e4e8f7): Link names, titles, and typed text.
-- **Soft Ink** (#454c5e, #a2aaca): Descriptions, group names, label tags, resting icons, and notice copy.
-- **Faint Ink** (#5c6376, #8088aa): Counts, legends, placeholder, and the title separator. It holds at least 5.3:1 on every surface it appears on in both themes.
+- **Soft Ink** (#454c5e, #adb5d2): Descriptions, group names, label tags, resting icons, and notice copy.
+- **Faint Ink** (#5c6376, #9ea5c1): Counts, legends, placeholder, and the title separator. It holds at least 4.6:1 on every surface it appears on in both themes, hover and amber wash included.
 - **Logo Halo** (#0b0d1459, #e4e8f7cc; second pass transparent, #e4e8f799): A tight outline behind image logos so a dark logo stays visible on dark panels and a light logo on light ones.
 
 ### Named Rules

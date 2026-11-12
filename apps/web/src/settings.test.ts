@@ -67,18 +67,18 @@ describe('createSettings', () => {
   it('makes the browser theme color follow an explicit theme', () => {
     document.head.innerHTML = `
       <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-      <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#06070b" />`
+      <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#21252b" />`
     const { store, dispose } = createRoot((disposeRoot) => ({
       store: createSettings(),
       dispose: disposeRoot,
     }))
 
     store.update({ theme: 'dark' })
-    expect(colors()).toEqual(['#06070b', '#06070b'])
+    expect(colors()).toEqual(['#21252b', '#21252b'])
     store.update({ theme: 'light' })
     expect(colors()).toEqual(['#ffffff', '#ffffff'])
     store.update({ theme: 'system' })
-    expect(colors()).toEqual(['#ffffff', '#06070b'])
+    expect(colors()).toEqual(['#ffffff', '#21252b'])
 
     dispose()
     document.head.innerHTML = ''
