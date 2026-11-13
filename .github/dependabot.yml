@@ -1,0 +1,41 @@
+version: 2
+
+# cooldown matches pnpm's three-day minimumReleaseAge.
+updates:
+  - package-ecosystem: gomod
+    directory: /apps/server
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    groups:
+      go:
+        patterns: ['*']
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    groups:
+      web:
+        patterns: ['*']
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3

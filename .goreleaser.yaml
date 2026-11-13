@@ -1,0 +1,53 @@
+version: 2
+
+project_name: pin
+
+before:
+  hooks:
+    - pnpm install --frozen-lockfile
+    - pnpm -C apps/web build
+
+builds:
+  - id: pin
+    dir: apps/server
+    main: ./cmd/pin
+    binary: pin
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+      - pin.example.yaml
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: Fixes
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: Other
+      order: 999
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
