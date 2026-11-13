@@ -20,7 +20,7 @@ RUN CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o /out/pin ./cmd/pin
 # --- runtime ---
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=server /out/pin /usr/local/bin/pin
-ENV PIN_ADDR=:8080
+ENV PIN_LISTEN=:8080 PIN_CONFIG=/config/pin.yaml
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s CMD ["/usr/local/bin/pin", "healthcheck"]
 ENTRYPOINT ["/usr/local/bin/pin"]
