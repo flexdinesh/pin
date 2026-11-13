@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/flexdinesh/pin/security/advisories/new
+    about: Report vulnerabilities privately.
+  - name: Docs
+    url: https://github.com/flexdinesh/pin/tree/main/docs
+    about: Configuration, deployment, widgets and usage.

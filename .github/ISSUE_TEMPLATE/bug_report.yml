@@ -1,0 +1,37 @@
+name: Bug report
+description: Something doesn't work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Config
+      description: The smallest pin.yaml that shows the problem. Remove private hosts.
+      render: yaml
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `pin version`, or the image tag.
+    validations:
+      required: true
+  - type: input
+    id: setup
+    attributes:
+      label: Setup
+      description: How you run pin (Docker, binary, Kubernetes), any proxy, and the browser.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant pin log output.
+      render: text
