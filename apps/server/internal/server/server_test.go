@@ -125,7 +125,8 @@ func TestManifestMeetsInstallCriteria(t *testing.T) {
 	if body.Name != "Lab" || body.ShortName != "pin" {
 		t.Errorf("names = %q, %q", body.Name, body.ShortName)
 	}
-	if body.StartURL != "/" || body.Scope != "/" || body.Display != "standalone" {
+	// Relative URLs keep install working under a base path.
+	if body.ID != "./" || body.StartURL != "./" || body.Scope != "./" || body.Display != "standalone" {
 		t.Errorf("manifest = %+v", body)
 	}
 	sizes := map[string]bool{}
@@ -136,6 +137,71 @@ func TestManifestMeetsInstallCriteria(t *testing.T) {
 	}
 	if !sizes["192x192"] || !sizes["512x512"] {
 		t.Errorf("icons = %+v", body.Icons)
+	}
+	for _, entry := range body.Icons {
+		if strings.HasPrefix(entry.Src, "/") {
+			t.Errorf("icon %q is root-absolute", entry.Src)
+		}
+	}
+}
+
+func TestNormalizeBasePath(t *testing.T) {
+	cases := map[string]string{
+		"":          "",
+		"/":         "",
+		"  ":        "",
+		"pin":       "/pin",
+		"/pin":      "/pin",
+		"/pin/":     "/pin",
+		"//a//b//":  "/a/b",
+		" /a/b/ ":   "/a/b",
+		"/a/../pin": "/pin",
+	}
+	for input, want := range cases {
+		if got := NormalizeBasePath(input); got != want {
+			t.Errorf("NormalizeBasePath(%q) = %q, want %q", input, got, want)
+		}
+	}
+}
+
+func TestMountAtRootIsUnchanged(t *testing.T) {
+	handler := Mount("", newHandler(t, fixtureAssets()))
+	if got := get(handler, http.MethodGet, "/api/config").Code; got != 200 {
+		t.Errorf("status = %d", got)
+	}
+}
+
+func TestMountUnderBasePath(t *testing.T) {
+	handler := Mount("/pin", newHandler(t, fixtureAssets()))
+	cases := []struct {
+		path   string
+		status int
+	}{
+		{"/pin/", 200},
+		{"/pin/api/config", 200},
+		{"/pin/healthz", 200},
+		{"/pin/assets/app-1.js", 200},
+		{"/pin/manifest.webmanifest", 200},
+		{"/", 404},
+		{"/api/config", 404},
+		{"/healthz", 404},
+		{"/pinned/", 404},
+		{"/pinapi/config", 404},
+	}
+	for _, tc := range cases {
+		if got := get(handler, http.MethodGet, tc.path).Code; got != tc.status {
+			t.Errorf("%s: status = %d, want %d", tc.path, got, tc.status)
+		}
+	}
+}
+
+func TestMountRedirectsBarePrefix(t *testing.T) {
+	handler := Mount("/pin", newHandler(t, fixtureAssets()))
+	for path, want := range map[string]string{"/pin": "/pin/", "/pin?x=1": "/pin/?x=1"} {
+		response := get(handler, http.MethodGet, path)
+		if response.Code != http.StatusMovedPermanently || response.Header().Get("Location") != want {
+			t.Errorf("%s: status %d, location %q, want %q", path, response.Code, response.Header().Get("Location"), want)
+		}
 	}
 }
 
@@ -171,8 +237,14 @@ func TestEmbeddedWebApp(t *testing.T) {
 	handler := newHandler(t, assets)
 
 	page := get(handler, http.MethodGet, "/")
-	if page.Code != 200 || !strings.Contains(page.Body.String(), `href="/api/config"`) {
+	if page.Code != 200 || !strings.Contains(page.Body.String(), `href="./api/config"`) {
 		t.Fatalf("index: status %d, missing config preload", page.Code)
+	}
+	// Root-absolute URLs would break serving under a base path.
+	for _, absolute := range []string{`"/assets`, `"/api`, `"/icons`, `"/manifest`} {
+		if strings.Contains(page.Body.String(), absolute) {
+			t.Errorf("index: root-absolute URL %s", absolute)
+		}
 	}
 
 	entries, err := fs.ReadDir(assets, "assets")
@@ -191,11 +263,11 @@ func TestEmbeddedWebApp(t *testing.T) {
 	}
 
 	for _, entry := range decodeManifest(t, handler).Icons {
-		assertPNG(t, handler, entry.Src, entry.Sizes)
+		assertPNG(t, handler, "/"+entry.Src, entry.Sizes)
 	}
 	assertPNG(t, handler, "/icons/apple-touch-icon.png", "180x180")
-	if !strings.Contains(page.Body.String(), `href="/icons/apple-touch-icon.png"`) ||
-		!strings.Contains(page.Body.String(), `href="/manifest.webmanifest"`) {
+	if !strings.Contains(page.Body.String(), `href="./icons/apple-touch-icon.png"`) ||
+		!strings.Contains(page.Body.String(), `href="./manifest.webmanifest"`) {
 		t.Error("index: missing install links")
 	}
 }

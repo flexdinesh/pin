@@ -3,6 +3,8 @@ import solid from 'vite-plugin-solid'
 
 export default defineConfig({
   plugins: [solid()],
+  // Relative URLs let the server run under any base path.
+  base: './',
   build: {
     outDir: '../server/internal/webui/dist',
     emptyOutDir: true,

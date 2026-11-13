@@ -39,7 +39,7 @@ describe('widget store', () => {
     expect(store.stateOf('0')).toEqual({ kind: 'loading' })
     await settle()
     expect(store.stateOf('0')).toEqual({ kind: 'ready', up: 12, down: 2 })
-    expect(fetchStub.mock.calls[0]?.[0]).toBe('/api/widgets/0')
+    expect(fetchStub.mock.calls[0]?.[0]).toBe('api/widgets/0')
     dispose()
   })
 
@@ -122,7 +122,7 @@ describe('widget store', () => {
   it('tracks widgets separately', async () => {
     fetchStub.mockImplementation((input) =>
       Promise.resolve(
-        input === '/api/widgets/1'
+        input === 'api/widgets/1'
           ? new Response('', { status: 502 })
           : Response.json({ up: 1, down: 0 }),
       ),
@@ -155,9 +155,9 @@ describe('widget store', () => {
     setIds(['0', '1'])
     await settle()
     expect(fetchStub.mock.calls.map(([input]) => input)).toEqual([
-      '/api/widgets/0',
-      '/api/widgets/0',
-      '/api/widgets/1',
+      'api/widgets/0',
+      'api/widgets/0',
+      'api/widgets/1',
     ])
     dispose()
   })

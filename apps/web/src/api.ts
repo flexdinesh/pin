@@ -80,7 +80,8 @@ export function parseConfig(value: unknown): Config {
 }
 
 export async function fetchConfig(): Promise<Config> {
-  const response = await fetch('/api/config')
+  // Relative to the page, so pin works under a base path.
+  const response = await fetch('api/config')
   if (!response.ok) throw new Error(`config request failed: ${response.status}`)
   const body: unknown = await response.json()
   return parseConfig(body)
@@ -94,7 +95,7 @@ export function parseWidgetStatus(value: unknown): WidgetStatus {
 }
 
 export async function fetchWidgetStatus(id: string, signal: AbortSignal): Promise<WidgetStatus> {
-  const response = await fetch(`/api/widgets/${encodeURIComponent(id)}`, { signal })
+  const response = await fetch(`api/widgets/${encodeURIComponent(id)}`, { signal })
   if (!response.ok) throw new Error(`widget request failed: ${response.status}`)
   const body: unknown = await response.json()
   return parseWidgetStatus(body)

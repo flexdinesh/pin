@@ -626,7 +626,7 @@ describe('widget tile', () => {
 
   function renderWidget(status: () => Promise<Response>) {
     const fetchStub = vi.fn((input: RequestInfo | URL) =>
-      input === '/api/config' ? Promise.resolve(Response.json(widgetConfig)) : status(),
+      input === 'api/config' ? Promise.resolve(Response.json(widgetConfig)) : status(),
     )
     vi.stubGlobal('fetch', fetchStub)
     render(() => <App />)

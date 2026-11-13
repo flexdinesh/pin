@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"path"
+	"strings"
 
 	"github.com/flexdinesh/pin/apps/server/internal/config"
 	"github.com/flexdinesh/pin/apps/server/internal/widget"
@@ -38,22 +40,58 @@ type manifest struct {
 	Icons           []manifestIcon `json:"icons"`
 }
 
+// newManifest uses URLs relative to the manifest, so the app installs under any
+// base path.
 func newManifest(title string) manifest {
 	return manifest{
-		ID:              "/",
+		ID:              "./",
 		Name:            title,
 		ShortName:       "pin",
-		StartURL:        "/",
-		Scope:           "/",
+		StartURL:        "./",
+		Scope:           "./",
 		Display:         "standalone",
 		BackgroundColor: appColor,
 		ThemeColor:      appColor,
 		Icons: []manifestIcon{
-			{Src: "/icons/icon-192.png", Sizes: "192x192", Type: "image/png"},
-			{Src: "/icons/icon-512.png", Sizes: "512x512", Type: "image/png"},
-			{Src: "/icons/icon-maskable-512.png", Sizes: "512x512", Type: "image/png", Purpose: "maskable"},
+			{Src: "icons/icon-192.png", Sizes: "192x192", Type: "image/png"},
+			{Src: "icons/icon-512.png", Sizes: "512x512", Type: "image/png"},
+			{Src: "icons/icon-maskable-512.png", Sizes: "512x512", Type: "image/png", Purpose: "maskable"},
 		},
 	}
+}
+
+// NormalizeBasePath returns a URL prefix with a leading slash and no trailing
+// slash, or "" for the root.
+func NormalizeBasePath(value string) string {
+	trimmed := strings.Trim(strings.TrimSpace(value), "/")
+	if trimmed == "" {
+		return ""
+	}
+	return path.Clean("/" + trimmed)
+}
+
+// Mount serves handler under basePath, as returned by NormalizeBasePath. The
+// bare prefix redirects to its trailing-slash form, which the web app's
+// relative URLs resolve against.
+func Mount(basePath string, handler http.Handler) http.Handler {
+	if basePath == "" {
+		return handler
+	}
+	stripped := http.StripPrefix(basePath, handler)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == basePath:
+			target := basePath + "/"
+			if r.URL.RawQuery != "" {
+				target += "?" + r.URL.RawQuery
+			}
+			http.Redirect(w, r, target, http.StatusMovedPermanently)
+		case strings.HasPrefix(r.URL.Path, basePath+"/"):
+			stripped.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
 }
 
 // New returns the handler. assets must hold index.html, assets/* and icons/*.

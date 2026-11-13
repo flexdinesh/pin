@@ -41,10 +41,12 @@ bookmarks:
 - pin reads the file at startup, so restart after editing.
 - A missing or invalid file stops startup, and every invalid entry is listed. Unknown keys count as invalid.
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `PIN_CONFIG` | `/config/pin.yaml` | Config file path |
-| `PIN_ADDR` | `:8080` | Listen address |
+| Variable | Flag | Default | Purpose |
+| --- | --- | --- | --- |
+| `PIN_CONFIG` | `--config` | `pin.yaml` (`/config/pin.yaml` in Docker) | Config file path |
+| `PIN_LISTEN` | `--listen` | `:8080` | `host:port`, or `unix:/path/to.sock` |
+| `PIN_BASE_PATH` | `--base-path` | none | URL prefix, e.g. `/pin` |
+| `PIN_SOCKET_MODE` | `--socket-mode` | `0660` | Unix socket file mode |
 
 ### Icons
 
