@@ -1,16 +1,15 @@
-# Example pin config. Mount your own file at /config/pin.yaml.
-# Every name, host and link below is synthetic.
+# Example pin config. Every host below is made up.
+# Reference: https://github.com/flexdinesh/pin/blob/main/docs/configuration.md
 title: Example Dashboard
 
-# Labels bookmarks can use. Quote colors, or YAML reads them as comments.
+# Quote colors, or YAML reads them as comments.
 labels:
   vpn: "#0ea5e9"
   beta:
 
 bookmarks:
-  # Live up and down counts, read from Gatus by the pin server. Add `url` under
-  # widget when pin reaches Gatus at another address. This host doesn't exist, so
-  # the tile says it can't reach Gatus.
+  # Live up and down counts from Gatus. Set widget.url when pin reaches Gatus at
+  # another address. This host doesn't exist, so the tile says it can't reach Gatus.
   - name: Gatus
     url: https://status.example.com
     group: Monitoring
