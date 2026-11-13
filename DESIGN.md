@@ -199,7 +199,7 @@ This system rejects sidebars, free-standing stat cards, hero headers, and soft s
 
 ## Colors
 
-Cool neutrals tinted slightly toward blue, plus one amber that is darker and burnt in light mode and bright in dark mode. Every token is one `light-dark()` pair, so a theme is never a separate palette. The dark ground is a deep slate taken from diffx's dark diff canvas; the rest of the dark palette is pin's own, tuned to it. The values below read light, then dark.
+Cool neutrals tinted slightly toward blue, plus one amber that is darker and burnt in light mode and bright in dark mode. Every token is one `light-dark()` pair, so a theme is never a separate palette. The rest of the dark palette is tuned to the deep slate ground. The values below read light, then dark.
 
 ### Primary
 

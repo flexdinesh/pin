@@ -50,7 +50,7 @@ Standing preference: the owner chose the familiar dashboard grid over a conceptu
 
 ## Evidence on Hand
 
-The owner's real config of 38 links is in the k8s-cluster repo. `pin.example.yaml` in this repo is synthetic. The logo is the Quad mark, specified under App Icon in DESIGN.md.
+`pin.example.yaml` in this repo is synthetic. The logo is the Quad mark, specified under App Icon in DESIGN.md.
 
 ## Product Principles
 
