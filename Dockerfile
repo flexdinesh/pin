@@ -10,7 +10,7 @@ COPY apps/web/ apps/web/
 RUN pnpm -C apps/web build
 
 # --- server: static, CGO-free binary with the app embedded ---
-FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine AS server
+FROM --platform=$BUILDPLATFORM golang:1.27.4-alpine AS server
 WORKDIR /src/apps/server
 COPY apps/server/go.mod apps/server/go.sum ./
 RUN go mod download
