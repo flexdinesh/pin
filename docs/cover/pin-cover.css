@@ -1,0 +1,273 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=block');
+
+/* pin's DESIGN.md tokens, light then dark. The stage ground is GitHub's page
+   color so the cover sits on the README itself. */
+.pc .ss-stage {
+  --gutter: 32px;
+  --pc-ground: #ffffff;
+  --pc-bg: #ffffff;
+  --pc-panel: #ffffff;
+  --pc-strip: #f2f3f6;
+  --pc-border: #0b0d141a;
+  --pc-border-strong: #0b0d1438;
+  --pc-text: #0b0d14;
+  --pc-text-2: #454c5e;
+  --pc-text-3: #5c6376;
+  --pc-halo: #0b0d1459;
+  --pc-halo-2: transparent;
+  --pc-code-key: #5c6376;
+  --pc-code-val: #0b0d14;
+
+  overflow: hidden;
+  background: var(--pc-ground);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+.pc .ss-stage[data-theme='dark'] {
+  --pc-ground: #0d1117;
+  --pc-bg: #21252b;
+  --pc-panel: #272b32;
+  --pc-strip: #2d3139;
+  --pc-border: #c0caf521;
+  --pc-border-strong: #c0caf53d;
+  --pc-text: #e4e8f7;
+  --pc-text-2: #adb5d2;
+  --pc-text-3: #9ea5c1;
+  --pc-halo: #e4e8f7cc;
+  --pc-halo-2: #e4e8f799;
+  --pc-code-key: #9ea5c1;
+  --pc-code-val: #e4e8f7;
+}
+
+.pc {
+  /* Inset top and sides, a full gutter on the right, the left column wide
+     enough for the yaml card to straddle; runs off the bottom. */
+  .pc-window {
+    position: absolute;
+    top: var(--gutter);
+    left: var(--gutter);
+    right: 112px;
+    height: 640px;
+    box-shadow: var(--ss-shadow-hero);
+  }
+
+  /* A quiet browser: a short centered address pill */
+  .pc-window .ss-window__url {
+    flex: 0 1 300px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .pc-window .ss-window__body {
+    background: var(--pc-bg);
+  }
+
+  .pc-app {
+    height: 100%;
+    background: var(--pc-bg);
+    color: var(--pc-text);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .pc-glyph {
+    flex: none;
+    color: var(--pc-text-2);
+  }
+
+  /* The bar: path at left, filter centered, settings at right */
+  .pc-bar {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 360px) 1fr;
+    align-items: center;
+    gap: 16px;
+    height: 54px;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--pc-border);
+  }
+
+  .pc-bar__path {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pc-bar__slash {
+    color: var(--pc-text-3);
+  }
+
+  .pc-bar__title {
+    font-weight: 600;
+  }
+
+  .pc-bar__cog {
+    justify-self: end;
+  }
+
+  .pc-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid var(--pc-border-strong);
+    background: var(--pc-panel);
+  }
+
+  .pc-filter__ph {
+    color: var(--pc-text-3);
+  }
+
+  .pc-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+  }
+
+  .pc-group__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 31px;
+    padding: 0 14px;
+    border: 1px solid var(--pc-border);
+    background: var(--pc-strip);
+  }
+
+  .pc-group__name {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--pc-text-2);
+  }
+
+  .pc-group__count {
+    margin-left: auto;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--pc-text-3);
+  }
+
+  /* A full row: content-sized tiles widened to both edges */
+  .pc-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .pc-tile {
+    display: flex;
+    flex: 1 1 auto;
+    border: 1px solid var(--pc-border);
+    background: var(--pc-panel);
+  }
+
+  .pc-tile__main {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 14px;
+  }
+
+  /* A row that is not full keeps content widths and leaves the rest open */
+  .pc-group[data-partial] .pc-tile {
+    flex: 0 0 auto;
+  }
+
+  .pc-tile__icon {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 1px var(--pc-halo)) drop-shadow(0 0 1px var(--pc-halo-2));
+  }
+
+  .pc-tile__mono {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--pc-border-strong);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--pc-text-2);
+  }
+
+  .pc-tile__text {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .pc-tile__name {
+    font-weight: 500;
+  }
+
+  .pc-tile__desc {
+    font-size: 12.5px;
+    color: var(--pc-text-2);
+  }
+
+  .pc-tag {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    padding: 1px 5px;
+    border: 1px solid var(--pc-border-strong);
+    font-size: 11px;
+    color: var(--pc-text-2);
+  }
+
+  .pc-tag__sq {
+    width: 6px;
+    height: 6px;
+    background: #0ea5e9;
+  }
+
+  /* The satellite: pin.yaml straddling the window's lower-left edge */
+  .pc-yaml {
+    position: absolute;
+    right: var(--gutter);
+    bottom: var(--gutter);
+    width: 268px;
+    border: 1px solid var(--pc-border-strong);
+    background: var(--pc-panel);
+    box-shadow: var(--ss-shadow-satellite);
+    color: var(--pc-text);
+  }
+
+  .pc-yaml__head {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--pc-border);
+    background: var(--pc-strip);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--pc-text-2);
+  }
+
+  .pc-yaml__code {
+    margin: 0;
+    padding: 12px 14px 14px;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    white-space: pre;
+  }
+
+  .pc-y-key,
+  .pc-y-punct {
+    color: var(--pc-code-key);
+  }
+
+  .pc-y-val {
+    color: var(--pc-code-val);
+  }
+}
