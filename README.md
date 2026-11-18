@@ -5,18 +5,29 @@
 
 # pin
 
-A self-hosted bookmark dashboard driven by one YAML file. No database, no accounts, no in-app editing.
+**Your homelab's start page, from one YAML file.**
+
+[![CI](https://github.com/flexdinesh/pin/actions/workflows/ci.yml/badge.svg)](https://github.com/flexdinesh/pin/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/flexdinesh/pin)](https://github.com/flexdinesh/pin/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png">
-  <img src="docs/screenshot-light.png" alt="pin dashboard with Monitoring, Apps and Home groups">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/cover-dark.webp">
+  <img src="docs/cover-light.webp" alt="pin dashboard with Monitoring, Media and Home groups beside the pin.yaml entry for Grafana">
 </picture>
 
-- Links in flat groups, with labels and icons from popular icon sets.
-- Live status on a link's tile (Gatus).
-- Type anywhere to filter. Enter opens the top match.
-- Light and dark themes. Desktop and phone. Installable as an app.
-- One static binary with the web app embedded, or a Docker image.
+pin is a fast, self-hosted bookmark dashboard. List your links in `pin.yaml`, keep it in Git, restart pin, done. No database, no accounts, no settings page to click through. Open it, type a few letters, press Enter, and you're there.
+
+## Features
+
+- **Reach, don't browse.** Type anywhere to filter by name, description, label or group. Enter opens the top match, Tab walks the results, Esc clears.
+- **One file, checked.** Unknown keys, bad URLs and unquoted colors stop startup, and pin lists every problem at once.
+- **Live status on the link.** Gatus up and down counts sit on the tile. pin fetches them server-side, so there's no CORS setup and internal addresses never reach the browser.
+- **Icons that just work.** Dashboard Icons, selfh.st, Material Design, Simple Icons or any URL. If an icon fails, a monogram stands in.
+- **Groups and labels.** Flat groups in config order, collapsible per browser. Colored labels show as small tags.
+- **Desktop and phone, equally.** Content-sized tiles on desktop, two lanes on phones, light and dark themes. Installable as an app, with pull to reload.
+- **Yours, per browser.** Theme, columns, density, link target and descriptions are saved locally. The server knows nothing about viewers.
+- **Ships small.** One static binary with the web app embedded, for Linux, macOS and Windows on amd64 and arm64, or a Docker image. Unix socket, subpath and healthcheck built in.
 
 ## Quick start
 
